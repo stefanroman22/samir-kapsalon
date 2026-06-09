@@ -1,0 +1,110 @@
+/**
+ * CMS content → next-intl messages bridge.
+ *
+ * The site ships local `messages/<locale>.json` as the seed/fallback (and for chrome
+ * like nav/cookie/loader that isn't CMS-managed). At request time we fetch the live
+ * CMS content for the active locale and DEEP-MERGE it over the local messages, so any
+ * edit the owner publishes in the CMS dashboard shows on the site within the revalidate
+ * window. If the CMS is unreachable or returns garbage, we silently fall back to the
+ * local messages — the site never breaks.
+ *
+ * NEXT_PUBLIC_CMS_ENDPOINT is the locale-less base (e.g. ".../content/samir-kapsalon");
+ * we append `/<locale>` for the published per-locale payload.
+ */
+
+type Json = Record<string, unknown>;
+
+/** Map a CMS key_value service → the next-intl namespace it backs. */
+const ENTRY_NS: Record<string, string> = {
+  hero: "hero",
+  about: "about",
+  trust_band: "trust",
+  services_teaser: "servicesTeaser",
+  gallery_teaser: "galleryTeaser",
+  reviews_section: "reviews",
+  instagram: "instagram",
+  location_strip: "location",
+  diensten_header: "diensten",
+  team_header: "team",
+  gallery_header: "galerij",
+  contact_content: "contact",
+  booking_page_header: "booking",
+  footer: "footer",
+};
+
+/** Build a partial next-intl message tree from the CMS `content` map. */
+function cmsToMessages(content: Json): Json {
+  const m: Json = {};
+  const ns = (key: string): Json => (m[key] ??= {}) as Json;
+
+  // key_value services → namespace (entries deep-merge over the local namespace)
+  for (const [svcKey, target] of Object.entries(ENTRY_NS)) {
+    const svc = content[svcKey] as Json | undefined;
+    const entries = svc?.entries as Json | undefined;
+    if (entries && typeof entries === "object") Object.assign(ns(target), entries);
+  }
+
+  // repeater services → nested array paths
+  const items = (key: string): unknown[] | null => {
+    const arr = (content[key] as Json | undefined)?.items;
+    return Array.isArray(arr) ? arr : null;
+  };
+  const teaser = items("services_teaser_items");
+  if (teaser) (ns("servicesTeaser") as Json).items = teaser;
+  const notes = items("service_notes");
+  if (notes) (ns("diensten") as Json).notes = notes;
+  const team = items("team_members");
+  if (team) (ns("team") as Json).members = team;
+  const reviews = items("reviews_items");
+  if (reviews) (ns("reviews") as Json).items = reviews;
+
+  // service_menu is flat ({group, name, desc, meta, price}); the site renders grouped.
+  const menu = items("service_menu");
+  if (menu) {
+    const groups: { title: string; items: Json[] }[] = [];
+    const byTitle: Record<string, number> = {};
+    for (const raw of menu as Json[]) {
+      const title = String(raw.group ?? "");
+      if (!(title in byTitle)) {
+        byTitle[title] = groups.length;
+        groups.push({ title, items: [] });
+      }
+      const { group: _group, ...rest } = raw;
+      groups[byTitle[title]].items.push(rest as Json);
+    }
+    (ns("diensten") as Json).groups = groups;
+  }
+
+  return m;
+}
+
+/** Deep-merge `over` onto `base`: objects merge recursively, arrays + scalars from
+ *  `over` win, and keys absent from `over` are preserved from `base`. */
+function deepMerge<T>(base: T, over: unknown): T {
+  if (over === undefined || over === null) return base;
+  if (Array.isArray(over)) return over as unknown as T;
+  if (typeof over === "object") {
+    const out: Json = { ...(base as Json) };
+    for (const [k, v] of Object.entries(over as Json)) {
+      out[k] = deepMerge((base as Json)?.[k], v);
+    }
+    return out as unknown as T;
+  }
+  return over as T;
+}
+
+/** Fetch + merge CMS content over the local messages for `locale`. Never throws. */
+export async function withCmsContent(locale: string, local: Json): Promise<Json> {
+  const base = (process.env.NEXT_PUBLIC_CMS_ENDPOINT || "").replace(/\/draft\/?$/, "");
+  if (!base) return local;
+  try {
+    const res = await fetch(`${base}/${locale}`, { next: { revalidate: 60 } });
+    if (!res.ok) return local;
+    const payload = (await res.json()) as { content?: Json };
+    if (!payload?.content || typeof payload.content !== "object") return local;
+    const cmsMessages = cmsToMessages(payload.content);
+    return deepMerge(local, cmsMessages);
+  } catch {
+    return local;
+  }
+}

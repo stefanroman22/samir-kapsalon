@@ -1389,6 +1389,148 @@ html.js .reveal.is-visible {
   border-radius: 50%;
 }
 
+/* ============================================================
+   BOOKING — desktop no-scroll + mobile one-screen flow
+   The active step pane (and its action buttons) must always be
+   reachable WITHOUT page scroll. On desktop we cap the booking
+   column to the viewport and let only the choices scroll
+   internally; the .step-actions bar stays pinned at the bottom.
+   ============================================================ */
+
+/* Desktop (>=768px): the pane is a flex column that fits the viewport.
+   The .step-scroll choice region absorbs any overflow internally so the
+   Continue/Confirm row never drops below the fold. The header padding
+   (.boek-header) + section padding are subtracted via the 100svh calc. */
+@media (min-width: 768px) {
+  .booking-main { position: relative; }
+  .step-pane {
+    display: flex;
+    flex-direction: column;
+    /* Fit within the viewport beneath the fixed header + booking header.
+       Generous reserve keeps the action bar visible on shorter laptops. */
+    max-height: calc(100svh - 220px);
+  }
+  .step-pane[hidden] { display: none; }
+  .step-pane-head { margin-bottom: 20px; flex: 0 0 auto; }
+  /* The choices region is the only thing that scrolls; the action bar below
+     it is sticky to the pane bottom so it is always on screen. */
+  .step-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* room so the last row isn't flush against the (sticky) action bar */
+    padding-bottom: 4px;
+    /* thin internal scrollbar (the page's is hidden globally) */
+    scrollbar-width: thin;
+  }
+  .step-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+  .step-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+  /* Tighten the action bar so it costs less vertical space on desktop. */
+  .step-pane .step-actions {
+    flex: 0 0 auto;
+    margin-top: 16px;
+    padding-top: 16px;
+    background: var(--background);
+  }
+  /* Success pane can grow naturally (it's the terminal screen). */
+  .step-pane.step-success { max-height: none; }
+}
+
+/* On mobile the page itself scrolls (one short step at a time), so the
+   internal cap is removed and choices flow naturally. */
+@media (max-width: 767px) {
+  .step-scroll { overflow: visible; }
+}
+
+/* Per-step Back control (mobile single-screen flow). Sits above the step
+   header so the user can always return to the previous selection without
+   hunting for the bottom action bar. */
+.step-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 8px 12px 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  transition: color var(--motion-base) var(--ease-standard);
+}
+.step-back:hover { color: var(--foreground); }
+
+/* Mobile pane: comfortable, self-contained card height so the primary action
+   sits within reach without long scrolling. */
+.step-pane--mobile { display: flex; flex-direction: column; }
+.step-pane--mobile .step-pane-head { margin-bottom: 24px; }
+.step-pane--mobile .step-actions { margin-top: 28px; padding-top: 24px; }
+
+/* ============================================================
+   BOOKING — submit overlay (confirm step)
+   Spinner morphs into a green check, then the pane hands off to
+   the success screen. Covers the confirm pane so there is no
+   layout jump while the request is in flight.
+   ============================================================ */
+.step-pane { position: relative; }
+.submit-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: oklch(96% 0.005 80 / 0.86);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  border-radius: var(--radius-md);
+}
+.submit-overlay-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.submit-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: oklch(50% 0.09 45 / 0.10);
+  color: var(--accent);
+  transition: background var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
+}
+/* Success beat: solid green disc with a white check. */
+.submit-mark.is-done {
+  background: oklch(60% 0.16 145);
+  color: var(--background);
+}
+.submit-spinner {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid oklch(50% 0.09 45 / 0.22);
+  border-top-color: var(--accent);
+  animation: loader-spin 0.8s linear infinite;
+}
+.submit-status {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+@media (prefers-reduced-motion: reduce) {
+  .submit-spinner { animation: none; }
+}
+
 /* ---------- Booking strip (shared CTA band) ---------- */
 .booking-strip { background: var(--primary); color: var(--primary-foreground); padding: 80px 0; }
 .booking-strip-row {
