@@ -1,0 +1,323 @@
+{
+  "metadata": {
+    "siteName": "Samir Kapsalon",
+    "homeTitle": "Samir Kapsalon — Barbershop in Nijmegen",
+    "homeDescription": "Klassieke knipbeurt, baard en scheren in hartje Nijmegen. 4.8★ op Google · Boek je afspraak online."
+  },
+  "loader": {
+    "loading": "Even de stoel klaarzetten…",
+    "ready": "Welkom bij Samir."
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Diensten",
+    "team": "Team",
+    "gallery": "Galerij",
+    "contact": "Contact",
+    "book": "Boek nu",
+    "ariaMain": "Hoofdnavigatie",
+    "ariaLang": "Taal",
+    "openMenu": "Open menu",
+    "closeMenu": "Sluit menu",
+    "menu": "Menu",
+    "homeAria": "Samir Kapsalon home"
+  },
+  "hero": {
+    "location": "Nijmegen — Groenestraat",
+    "titleLine1": "Klassiek",
+    "titleLine2": "vakmanschap.",
+    "sub": "Knippen, baard en scheren — sinds jaar en dag.",
+    "book": "Boek een afspraak",
+    "services": "Diensten",
+    "scroll": "Scroll",
+    "imageAlt": "Barber aan het werk in zijn salon — over-the-shoulder shot"
+  },
+  "trust": {
+    "rating": "4.8 · 105 BEOORDELINGEN OP GOOGLE",
+    "address": "GROENESTRAAT 277 · NIJMEGEN",
+    "openToday": "OPEN VANDAAG TOT 18:00"
+  },
+  "servicesTeaser": {
+    "eyebrow": "— Diensten",
+    "titleLine1": "Knippen.",
+    "titleLine2": "Scheren.",
+    "all": "Alle diensten →",
+    "items": [
+      { "name": "Knipbeurt", "desc": "Klassiek knippen, machine of schaar.", "price": "€25", "meta": "~30 min" },
+      { "name": "Baard scheren · hot towel", "desc": "Mes, hete handdoek, aftercare.", "price": "€25", "meta": "~35 min" },
+      { "name": "Knip + scheerbeurt", "desc": "De volledige zit, in één afspraak.", "price": "€45", "meta": "~60 min" }
+    ]
+  },
+  "about": {
+    "eyebrow": "— Over Samir",
+    "titleLine1": "Een vaste plek.",
+    "titleLine2": "Een vaste barber.",
+    "paragraph": "Bij Samir krijg je geen overhaaste knipbeurt — je krijgt aandacht voor het detail, een gesprek als je dat wilt, en stilte als je dat liever hebt. Klassieke knipbeurt, baardonderhoud en de hot-towel-scheerbeurt waar onze gasten over schrijven.",
+    "stat1Value": "20+",
+    "stat1Label": "JAAR VAKMANSCHAP",
+    "stat2Value": "2",
+    "stat2Label": "BARBERS",
+    "stat3Value": "4.8★",
+    "stat3Label": "105 REVIEWS",
+    "img1Alt": "Interieur — vintage barberstoel en spiegels",
+    "img2Alt": "Detail — clippers en kammen op marmer"
+  },
+  "galleryTeaser": {
+    "eyebrow": "— Galerij",
+    "titleLine1": "Werk in",
+    "titleLine2": "uitvoering.",
+    "all": "Volledige galerij →",
+    "alts": ["Barber knipt klant", "Close-up knipbeurt", "Schaar en kam", "Baardonderhoud", "Barberstoel"]
+  },
+  "reviews": {
+    "eyebrow": "— Wat onze gasten zeggen",
+    "items": [
+      { "text": "These guys are best and know how to take care of their clients. Thanks for the amazing shave.", "author": "Saad B.", "when": "3 maanden geleden" },
+      { "text": "Barbershop in the middle of Nijmegen. Friendly and professional staff. Also lots of parking nearby.", "author": "J V A", "when": "3 jaar geleden" }
+    ],
+    "readAll": "Lees alle 105 reviews op Google Maps ↗",
+    "score": "4.8 / 5 — 105 ★"
+  },
+  "instagram": {
+    "eyebrow": "— Instagram",
+    "handle": "@samirkapsalon.nijmegen ↗",
+    "alt": "Instagram post",
+    "follow": "Volg ons op Instagram →"
+  },
+  "location": {
+    "eyebrow": "— Vind ons",
+    "streetLine": "Groenestraat",
+    "number": "277",
+    "postcode": "6531 HK Nijmegen",
+    "phoneDisplay": "024 355 7011",
+    "openToday": "Vandaag open",
+    "until": "tot 18:00",
+    "mapAria": "Open kaart op contactpagina",
+    "caption": "Groenestraat 277, Nijmegen"
+  },
+  "hours": {
+    "mon": "Maandag",
+    "tue": "Dinsdag",
+    "wed": "Woensdag",
+    "thu": "Donderdag · koopavond",
+    "fri": "Vrijdag",
+    "sat": "Zaterdag",
+    "sun": "Zondag",
+    "monShort": "Ma",
+    "tueShort": "Di",
+    "wedShort": "Wo",
+    "thuShort": "Do",
+    "friShort": "Vr",
+    "satShort": "Za",
+    "sunShort": "Zo",
+    "closed": "Gesloten"
+  },
+  "footer": {
+    "tagline": "Klassiek vakmanschap, in hartje Nijmegen. Sinds — Groenestraat.",
+    "visit": "Bezoek",
+    "hoursTitle": "Openingstijden",
+    "pagesTitle": "Pagina's",
+    "copyright": "© 2026 hairdresser Samir — KVK Nijmegen",
+    "legal": "Privacy · Cookies · Algemene voorwaarden"
+  },
+  "cookie": {
+    "text": "Wij gebruiken alleen functionele cookies. Geen tracking, geen advertenties.",
+    "decline": "Weiger",
+    "ok": "OK"
+  },
+  "bookingStrip": {
+    "cta": "Boek een afspraak →",
+    "default": "Klaar voor de stoel?",
+    "team": "Boek bij jouw favoriet.",
+    "gallery": "Klaar voor de stoel?",
+    "contact": "Klaar voor de stoel?"
+  },
+  "diensten": {
+    "metaTitle": "Diensten & Prijzen",
+    "metaDescription": "Alle diensten en prijzen voor onze barbershop in Nijmegen. Knipbeurt, baard, scheren en combinaties — eerlijke prijzen, online te boeken.",
+    "eyebrow": "— Diensten / Services",
+    "titleLine1": "Klassiek",
+    "titleLine2": "vakmanschap.",
+    "titleLine3": "Eerlijke prijzen.",
+    "intro": "Alle prijzen zijn inclusief BTW. Pinnen, contant en contactloos betalen mogelijk. Walk-ins welkom — maar boek vooruit voor zekerheid.",
+    "groups": [
+      {
+        "title": "Knippen",
+        "items": [
+          { "name": "Knipbeurt", "desc": "Klassiek knippen, machine of schaar. Inclusief wassen en styling.", "meta": "~30 min", "price": "€25" },
+          { "name": "Kinderknip · t/m 12 jr", "desc": "Geduldig, met afleiding voor de kleintjes.", "meta": "~25 min", "price": "€18" },
+          { "name": "Senior · 65+", "desc": "Klassieke knipbeurt, rustig tempo.", "meta": "~30 min", "price": "€22" }
+        ]
+      },
+      {
+        "title": "Baard",
+        "items": [
+          { "name": "Baard trimmen", "desc": "Onderhoudsbeurt — lijnen, lengte, randen.", "meta": "~20 min", "price": "€15" },
+          { "name": "Baard scheren met hot towel", "desc": "Klassiek scheren met messcheermes. Hete handdoek, scheercrème, aftercare.", "meta": "~35 min", "price": "€25" }
+        ]
+      },
+      {
+        "title": "Scheren",
+        "items": [
+          { "name": "Klassieke scheerbeurt", "desc": "Het volledige ritueel: hete handdoek, voorbereiding, twee scheerbeurten, koude handdoek, balsem.", "meta": "~45 min", "price": "€30" }
+        ]
+      },
+      {
+        "title": "Combinaties",
+        "items": [
+          { "name": "Knip + baard", "desc": "Knipbeurt met een baardtrim erbij.", "meta": "~50 min", "price": "€35" },
+          { "name": "Knip + scheerbeurt", "desc": "Knipbeurt en klassieke scheerbeurt in één afspraak.", "meta": "~60 min", "price": "€45" },
+          { "name": "Volledige verzorging", "desc": "Knipbeurt, baardtrim én klassieke scheerbeurt. Reken op ongeveer 75 minuten.", "meta": "~75 min", "price": "€55" }
+        ]
+      }
+    ],
+    "notes": [
+      { "eyebrow": "— Het hot-towel ritueel", "title": "Niet snel, niet voorzichtig — secuur.", "body": "De scheerbeurt is geen afhandeling — het is een zit. Hete handdoek om de baard te openen, twee scheerbeurten met het mes, koude handdoek om af te sluiten. Reken op 45 minuten." },
+      { "eyebrow": "— Walk-in of boek", "title": "Loop binnen, of reserveer.", "body": "Walk-ins zijn welkom — er staat altijd koffie. Maar op donderdag en zaterdag loopt het vol; boek dan online of bel even." },
+      { "eyebrow": "— Betalen", "title": "Pin, contant, contactloos.", "body": "Alle gangbare manieren. Geen creditcards. Geen fooienpot — maar het wordt op prijs gesteld." }
+    ]
+  },
+  "team": {
+    "metaTitle": "Het team",
+    "metaDescription": "Maak kennis met de barbers van Samir Kapsalon. Vakmanschap en persoonlijk contact in hartje Nijmegen.",
+    "eyebrow": "— Het team / The team",
+    "titleLine1": "De mensen",
+    "titleLine2": "achter de",
+    "titleLine3": "schaar.",
+    "intro": "Twee barbers, één plek. Vraag bij het boeken naar je voorkeur — of laat het ons kiezen.",
+    "members": [
+      { "role": "Eigenaar / Senior barber", "bio": "20+ jaar achter de stoel. Klassieke scheerbeurt met hot towel is zijn handtekening — hier komen mensen voor uit Arnhem, Wijchen en verder.", "bookCta": "Boek bij Samir", "portraitAlt": "Samir Yılmaz — eigenaar en senior barber" },
+      { "role": "Barber", "bio": "Moderne knipbeurten, baardonderhoud, fades. Snelle handen — maar nooit haastig. Vraag naar een textured crop.", "bookCta": "Boek bij Mehmet", "portraitAlt": "Mehmet Demir — barber" }
+    ],
+    "careersEyebrow": "— Werken bij Samir",
+    "careersTitle": "Ervaren barber? Kom langs voor een gesprek.",
+    "careersBody": "Geen formulieren. Loop een keer binnen, knip een paar koppen mee, en we praten. Of stuur ons een DM op Instagram.",
+    "careersCta": "DM op Instagram →",
+    "igLink": "@samirkapsalon.nijmegen ↗"
+  },
+  "galerij": {
+    "metaTitle": "Galerij",
+    "metaDescription": "Sfeerbeelden uit onze barbershop in Nijmegen. Interieur, werk in uitvoering, klassiek vakmanschap in beeld.",
+    "eyebrow": "— Galerij / Gallery",
+    "titleLine1": "In de",
+    "titleLine2": "barbershop.",
+    "intro": "Sfeerbeelden uit onze plek aan de Groenestraat. Interieur, werk in uitvoering, finished cuts.",
+    "caption": "Beelden zijn placeholders tot we de fotograaf inplannen. Echt commissioned werk volgt voor de launch.",
+    "lightboxClose": "Sluit",
+    "lightboxPrev": "Vorige",
+    "lightboxNext": "Volgende",
+    "lightboxDialog": "Galerij",
+    "imageAlt": "Galerij afbeelding"
+  },
+  "contact": {
+    "metaTitle": "Contact & route",
+    "metaDescription": "Vind Samir Kapsalon aan de Groenestraat 277 in Nijmegen. Bel 024 355 7011 of boek online. Goede parkeergelegenheid in de buurt.",
+    "eyebrow": "— Contact",
+    "titleLine1": "Vind",
+    "titleLine2": "ons.",
+    "addressLabel": "Adres",
+    "routeCta": "Route op Google Maps ↗",
+    "callLabel": "Bel direct",
+    "callNote": "Tijdens openingstijden — buiten openingstijden: DM op Instagram.",
+    "followLabel": "Volg & DM",
+    "parkingLabel": "Parkeren",
+    "parkingBody": "Betaald parkeren in de straat en in de omliggende zijstraten. Goede parkeergelegenheid in de buurt — onze gasten schrijven er ook over.",
+    "bookCta": "Boek een afspraak →",
+    "mapOpen": "Open in kaarten ↗",
+    "igLink": "@samirkapsalon.nijmegen ↗",
+    "hoursEyebrow": "— Openingstijden / Opening hours",
+    "hoursTitle": "Wanneer we open zijn.",
+    "hoursBody": "Donderdag is onze koopavond. Zondag gesloten — koffie is dan voor de buurt, niet voor ons."
+  },
+  "booking": {
+    "metaTitle": "Boek online",
+    "metaDescription": "Boek direct je afspraak online bij Samir Kapsalon in Nijmegen. Kies dienst, barber en tijdstip.",
+    "headerEyebrow": "— Reserveer / Reserve",
+    "titleLine1": "Boek je",
+    "titleLine2": "afspraak.",
+    "intro": "Vier stappen. Geen account nodig. Bevestiging per e-mail.",
+    "stepService": "Dienst",
+    "stepBarber": "Barber",
+    "stepDatetime": "Datum & tijd",
+    "stepDetails": "Gegevens",
+    "stepConfirm": "Bevestigen",
+    "sideHelp": "Liever bellen of langslopen? Walk-ins zijn welkom.",
+    "sideIg": "DM op Instagram ↗",
+    "pane1Eyebrow": "STAP 01 / 04",
+    "pane1Title": "Kies je dienst.",
+    "groupCuts": "Knippen",
+    "groupBeard": "Baard / Scheren",
+    "groupCombo": "Combinaties",
+    "serviceNames": {
+      "cut-adult": "Knipbeurt",
+      "cut-kid": "Kinderknip",
+      "cut-senior": "Senior",
+      "beard-trim": "Baard trimmen",
+      "beard-shave": "Baard scheren · hot towel",
+      "shave-classic": "Klassieke scheerbeurt",
+      "combo-cut-beard": "Knip + baard",
+      "combo-cut-shave": "Knip + scheerbeurt",
+      "combo-full": "Volledige verzorging"
+    },
+    "serviceMeta": {
+      "cut-adult": "~30 min",
+      "cut-kid": "~25 min · t/m 12 jr",
+      "cut-senior": "~30 min · 65+",
+      "beard-trim": "~20 min",
+      "beard-shave": "~35 min",
+      "shave-classic": "~45 min",
+      "combo-cut-beard": "~50 min",
+      "combo-cut-shave": "~60 min",
+      "combo-full": "~75 min · knip + baard + scheren"
+    },
+    "continue": "Verder →",
+    "back": "← Terug",
+    "pane2Eyebrow": "STAP 02 / 04",
+    "pane2Title": "Bij wie zit je?",
+    "barberAny": "Geen voorkeur",
+    "barberAnyDesc": "Wij zoeken de eerste vrije stoel.",
+    "barberSamir": "Samir Yılmaz",
+    "barberSamirDesc": "Senior · scheren · mes",
+    "barberMehmet": "Mehmet Demir",
+    "barberMehmetDesc": "Modern · fades · trim",
+    "pane3Eyebrow": "STAP 03 / 04",
+    "pane3Title": "Wanneer schikt?",
+    "pickDay": "Kies een dag",
+    "pickTime": "Kies een tijdstip",
+    "pickDayFirst": "Kies eerst een dag.",
+    "closedLabel": "Gesloten",
+    "pane4Eyebrow": "STAP 04 / 04",
+    "pane4Title": "Jouw gegevens.",
+    "nameLabel": "Naam *",
+    "phoneLabel": "Telefoon *",
+    "emailLabel": "E-mail (optioneel)",
+    "notesLabel": "Opmerkingen (optioneel)",
+    "phonePlaceholder": "06 12345678",
+    "emailPlaceholder": "naam@voorbeeld.nl",
+    "notesPlaceholder": "Bv. liefst een rustige tijd, of een specifieke wens.",
+    "errName": "Vul je naam in.",
+    "errPhone": "Geen geldig telefoonnummer.",
+    "toConfirm": "Naar bevestiging →",
+    "pane5Eyebrow": "— BEVESTIG",
+    "pane5Title": "Klopt alles?",
+    "confService": "Dienst",
+    "confBarber": "Barber",
+    "confWhen": "Datum & tijd",
+    "confName": "Naam",
+    "confPhone": "Telefoon",
+    "confEmail": "E-mail",
+    "confNotes": "Opmerkingen",
+    "confPrice": "Te betalen op locatie",
+    "confirmNote": "Je ontvangt een bevestiging per SMS en, indien opgegeven, per e-mail. Betalen kan met pin, contant of contactloos in de zaak.",
+    "editBack": "← Aanpassen",
+    "confirmBtn": "Bevestig boeking",
+    "submitting": "Bezig…",
+    "submitError": "Er ging iets mis. Probeer opnieuw of bel ons.",
+    "successTitle": "Tot ziens in de stoel.",
+    "successBody": "Je afspraak is doorgegeven. Bewaar deze bevestiging — of zet 'm in je agenda.",
+    "refLabel": "Referentie",
+    "toHome": "← Naar home",
+    "another": "Nog een boeking",
+    "dateLocale": "nl-NL"
+  }
+}

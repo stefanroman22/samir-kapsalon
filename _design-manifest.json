@@ -1,0 +1,53 @@
+{
+  "source": { "type": "url", "ref": "https://api.anthropic.com/v1/design/h/otfeo80llCBQzA_WlCOSSg" },
+  "business": {
+    "name": "Samir Kapsalon",
+    "legalName": "hairdresser Samir",
+    "description": "Industrial-utilitarian men's barbershop in Nijmegen (Groenestraat 277).",
+    "domain": null
+  },
+  "intent": "service",
+  "locales": ["nl", "en"],
+  "default_locale": "nl",
+  "tokens": {
+    "colors": {
+      "background": "oklch(96% 0.005 80)",
+      "foreground": "oklch(20% 0.015 60)",
+      "primary": "oklch(22% 0.015 60)",
+      "accent": "oklch(50% 0.09 45)",
+      "muted": "oklch(92% 0.006 70)",
+      "border": "oklch(86% 0.005 70)"
+    },
+    "fonts": { "display": "Anton (GT America Condensed)", "body": "Switzer (Söhne)" },
+    "radii": ["1px", "2px", "4px", "6px"],
+    "motion": { "fast": "120ms", "base": "200ms", "slow": "400ms" }
+  },
+  "pages": [
+    { "slug": "/", "title": "Home", "sections": ["hero", "trust", "services-teaser", "about", "gallery-teaser", "reviews", "instagram", "location", "footer"] },
+    { "slug": "/diensten", "title": "Diensten", "sections": ["page-header", "service-table", "service-notes"] },
+    { "slug": "/team", "title": "Team", "sections": ["page-header", "team-grid", "careers"] },
+    { "slug": "/galerij", "title": "Galerij", "sections": ["page-header", "masonry-grid", "lightbox"] },
+    { "slug": "/boek", "title": "Boek", "sections": ["page-header", "multi-step-form", "fallback-strip"] },
+    { "slug": "/contact", "title": "Contact", "sections": ["two-column", "hours-table", "map"] }
+  ],
+  "interactions": [
+    "scroll-state header (transparent overlay -> charcoal blur)",
+    "mobile drawer slide-down",
+    "scroll reveal (opacity + 8px translate, once)",
+    "service-row accent bar grow on hover (no text reflow)",
+    "language switch path-preserving",
+    "cookie strip dismiss",
+    "today-row highlight in hours table",
+    "multi-step booking form (sessionStorage, hour-aware) — /boek"
+  ],
+  "responsive_gaps": [
+    "Resolved in design v-final: overflow-x hidden guard, header CTA visible 420px+, hours nowrap, animated mobile drawer, service-row hover no reflow"
+  ],
+  "notes": [
+    "Design is fully bilingual at source (data-nl/data-en) — both locales get real copy, no placeholders.",
+    "Imagery = editorial Unsplash URLs as v1 PLACEHOLDERS (kept via next.config remotePatterns); 5 uploaded PNGs preserved in public/images/uploads.",
+    "Dummy data flagged PLACEHOLDER: hours, team, prices, photography.",
+    "Booking backend stubbed (/api/bookings) per scope decision; DB + Resend are TODO.",
+    "shadcn/ui intentionally not used for marketing pages — design ships its own component CSS system."
+  ]
+}

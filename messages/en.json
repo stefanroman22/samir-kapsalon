@@ -1,0 +1,323 @@
+{
+  "metadata": {
+    "siteName": "Samir Kapsalon",
+    "homeTitle": "Samir Kapsalon — Barbershop in Nijmegen",
+    "homeDescription": "Classic cuts, beard work and shaves in central Nijmegen. 4.8★ on Google · Book your appointment online."
+  },
+  "loader": {
+    "loading": "Just setting up the chair…",
+    "ready": "Welcome to Samir."
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "team": "Team",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "book": "Book now",
+    "ariaMain": "Main navigation",
+    "ariaLang": "Language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu",
+    "homeAria": "Samir Kapsalon home"
+  },
+  "hero": {
+    "location": "Nijmegen — Groenestraat",
+    "titleLine1": "Classic",
+    "titleLine2": "craft.",
+    "sub": "Cuts, beards and shaves — for years.",
+    "book": "Book an appointment",
+    "services": "Services",
+    "scroll": "Scroll",
+    "imageAlt": "Barber at work in his salon — over-the-shoulder shot"
+  },
+  "trust": {
+    "rating": "4.8 · 105 GOOGLE REVIEWS",
+    "address": "GROENESTRAAT 277 · NIJMEGEN",
+    "openToday": "OPEN TODAY UNTIL 18:00"
+  },
+  "servicesTeaser": {
+    "eyebrow": "— Services",
+    "titleLine1": "Cuts.",
+    "titleLine2": "Shaves.",
+    "all": "All services →",
+    "items": [
+      { "name": "Haircut", "desc": "Classic cut, clipper or scissor.", "price": "€25", "meta": "~30 min" },
+      { "name": "Beard shave · hot towel", "desc": "Razor, hot towel, aftercare.", "price": "€25", "meta": "~35 min" },
+      { "name": "Cut + shave", "desc": "The full sit, in one visit.", "price": "€45", "meta": "~60 min" }
+    ]
+  },
+  "about": {
+    "eyebrow": "— About Samir",
+    "titleLine1": "A regular chair.",
+    "titleLine2": "A regular barber.",
+    "paragraph": "At Samir you don't get a rushed cut — you get attention to detail, conversation if you want it, quiet if you'd rather. Classic cuts, beard work and the hot-towel shave our guests write about.",
+    "stat1Value": "20+",
+    "stat1Label": "YEARS OF CRAFT",
+    "stat2Value": "2",
+    "stat2Label": "BARBERS",
+    "stat3Value": "4.8★",
+    "stat3Label": "105 REVIEWS",
+    "img1Alt": "Interior — vintage barber chair and mirrors",
+    "img2Alt": "Detail — clippers and combs on marble"
+  },
+  "galleryTeaser": {
+    "eyebrow": "— Gallery",
+    "titleLine1": "Work in",
+    "titleLine2": "progress.",
+    "all": "Full gallery →",
+    "alts": ["Barber cutting a client", "Close-up haircut", "Scissors and comb", "Beard work", "Barber chair"]
+  },
+  "reviews": {
+    "eyebrow": "— What our guests say",
+    "items": [
+      { "text": "These guys are best and know how to take care of their clients. Thanks for the amazing shave.", "author": "Saad B.", "when": "3 months ago" },
+      { "text": "Barbershop in the middle of Nijmegen. Friendly and professional staff. Also lots of parking nearby.", "author": "J V A", "when": "3 years ago" }
+    ],
+    "readAll": "Read all 105 reviews on Google Maps ↗",
+    "score": "4.8 / 5 — 105 ★"
+  },
+  "instagram": {
+    "eyebrow": "— Instagram",
+    "handle": "@samirkapsalon.nijmegen ↗",
+    "alt": "Instagram post",
+    "follow": "Follow us on Instagram →"
+  },
+  "location": {
+    "eyebrow": "— Find us",
+    "streetLine": "Groenestraat",
+    "number": "277",
+    "postcode": "6531 HK Nijmegen",
+    "phoneDisplay": "024 355 7011",
+    "openToday": "Open today",
+    "until": "until 18:00",
+    "mapAria": "Open map on contact page",
+    "caption": "Groenestraat 277, Nijmegen"
+  },
+  "hours": {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday · late night",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday",
+    "monShort": "Mon",
+    "tueShort": "Tue",
+    "wedShort": "Wed",
+    "thuShort": "Thu",
+    "friShort": "Fri",
+    "satShort": "Sat",
+    "sunShort": "Sun",
+    "closed": "Closed"
+  },
+  "footer": {
+    "tagline": "Classic craft, in the heart of Nijmegen. Since — Groenestraat.",
+    "visit": "Visit",
+    "hoursTitle": "Hours",
+    "pagesTitle": "Pages",
+    "copyright": "© 2026 hairdresser Samir — KVK Nijmegen",
+    "legal": "Privacy · Cookies · Terms"
+  },
+  "cookie": {
+    "text": "We only use functional cookies. No tracking, no ads.",
+    "decline": "Decline",
+    "ok": "OK"
+  },
+  "bookingStrip": {
+    "cta": "Book an appointment →",
+    "default": "Ready for the chair?",
+    "team": "Book with your favourite.",
+    "gallery": "Ready for the chair?",
+    "contact": "Ready for the chair?"
+  },
+  "diensten": {
+    "metaTitle": "Services & Prices",
+    "metaDescription": "All services and prices for our barbershop in Nijmegen. Haircut, beard, shave and combinations — honest prices, bookable online.",
+    "eyebrow": "— Diensten / Services",
+    "titleLine1": "Classic",
+    "titleLine2": "craft.",
+    "titleLine3": "Honest prices.",
+    "intro": "All prices include VAT. Card, cash and contactless accepted. Walk-ins welcome — but book ahead to be sure of a seat.",
+    "groups": [
+      {
+        "title": "Cuts",
+        "items": [
+          { "name": "Haircut", "desc": "Classic cut, clipper or scissor. Wash and styling included.", "meta": "~30 min", "price": "€25" },
+          { "name": "Kids' cut · ≤12 yrs", "desc": "Patient, with distraction for the little ones.", "meta": "~25 min", "price": "€18" },
+          { "name": "Senior · 65+", "desc": "Classic cut, taken at a relaxed pace.", "meta": "~30 min", "price": "€22" }
+        ]
+      },
+      {
+        "title": "Beard",
+        "items": [
+          { "name": "Beard trim", "desc": "Maintenance — lines, length, edges.", "meta": "~20 min", "price": "€15" },
+          { "name": "Beard shave · hot towel", "desc": "Classic straight-razor shave. Hot towel, lather, aftercare.", "meta": "~35 min", "price": "€25" }
+        ]
+      },
+      {
+        "title": "Shave",
+        "items": [
+          { "name": "Classic shave", "desc": "The full ritual: hot towel, prep, two passes, cold towel, balm.", "meta": "~45 min", "price": "€30" }
+        ]
+      },
+      {
+        "title": "Combinations",
+        "items": [
+          { "name": "Cut + beard", "desc": "Haircut paired with a beard trim.", "meta": "~50 min", "price": "€35" },
+          { "name": "Cut + shave", "desc": "Haircut plus classic shave in one visit.", "meta": "~60 min", "price": "€45" },
+          { "name": "The full service", "desc": "Haircut, beard trim and classic shave. Plan for around 75 minutes.", "meta": "~75 min", "price": "€55" }
+        ]
+      }
+    ],
+    "notes": [
+      { "eyebrow": "— The hot-towel ritual", "title": "Not fast, not careful — meticulous.", "body": "The shave isn't a transaction — it's a sit. Hot towel to open the beard, two razor passes, cold towel to close. Plan for 45 minutes." },
+      { "eyebrow": "— Walk in or book", "title": "Walk in, or book ahead.", "body": "Walk-ins welcome — coffee's always on. Thursdays and Saturdays fill up; book online or call ahead on those days." },
+      { "eyebrow": "— Payment", "title": "Card, cash, contactless.", "body": "All the usual ways. No credit cards. No tip jar — but it's appreciated." }
+    ]
+  },
+  "team": {
+    "metaTitle": "The team",
+    "metaDescription": "Meet the barbers of Samir Kapsalon. Craft and personal contact in the heart of Nijmegen.",
+    "eyebrow": "— Het team / The team",
+    "titleLine1": "The people",
+    "titleLine2": "behind the",
+    "titleLine3": "scissors.",
+    "intro": "Two barbers, one chair-room. Ask for your preferred barber when booking — or let us match you.",
+    "members": [
+      { "role": "Owner / Senior barber", "bio": "20+ years behind the chair. The hot-towel shave is his signature — guests travel from Arnhem and Wijchen to sit in it.", "bookCta": "Book with Samir", "portraitAlt": "Samir Yılmaz — owner and senior barber" },
+      { "role": "Barber", "bio": "Modern cuts, beard work, fades. Quick hands — never rushed. Ask him about textured crops.", "bookCta": "Book with Mehmet", "portraitAlt": "Mehmet Demir — barber" }
+    ],
+    "careersEyebrow": "— Work with us",
+    "careersTitle": "Experienced barber? Drop by for a chat.",
+    "careersBody": "No forms. Drop in, cut a few heads with us, and we'll talk. Or send us a DM on Instagram.",
+    "careersCta": "DM on Instagram →",
+    "igLink": "@samirkapsalon.nijmegen ↗"
+  },
+  "galerij": {
+    "metaTitle": "Gallery",
+    "metaDescription": "Snapshots from our barbershop in Nijmegen. Interior, work in progress, classic craft in pictures.",
+    "eyebrow": "— Galerij / Gallery",
+    "titleLine1": "Inside the",
+    "titleLine2": "barbershop.",
+    "intro": "Snapshots from our spot on Groenestraat. Interior, work in progress, finished cuts.",
+    "caption": "Images are placeholders pending a half-day photo shoot in the Groenestraat shop.",
+    "lightboxClose": "Close",
+    "lightboxPrev": "Previous",
+    "lightboxNext": "Next",
+    "lightboxDialog": "Gallery",
+    "imageAlt": "Gallery image"
+  },
+  "contact": {
+    "metaTitle": "Contact & directions",
+    "metaDescription": "Find Samir Kapsalon at Groenestraat 277 in Nijmegen. Call 024 355 7011 or book online. Easy parking nearby.",
+    "eyebrow": "— Contact",
+    "titleLine1": "Find",
+    "titleLine2": "us.",
+    "addressLabel": "Address",
+    "routeCta": "Route on Google Maps ↗",
+    "callLabel": "Call us",
+    "callNote": "During opening hours — outside: DM on Instagram.",
+    "followLabel": "Follow & DM",
+    "parkingLabel": "Parking",
+    "parkingBody": "Paid street parking along Groenestraat and adjacent streets. Easy to find a spot, as guests note in their reviews.",
+    "bookCta": "Book an appointment →",
+    "mapOpen": "Open in maps ↗",
+    "igLink": "@samirkapsalon.nijmegen ↗",
+    "hoursEyebrow": "— Openingstijden / Opening hours",
+    "hoursTitle": "When we're open.",
+    "hoursBody": "Thursdays we stay late. Sundays closed — the coffee's for the neighbourhood, not us."
+  },
+  "booking": {
+    "metaTitle": "Book online",
+    "metaDescription": "Book your appointment online at Samir Kapsalon in Nijmegen. Choose service, barber and time.",
+    "headerEyebrow": "— Reserveer / Reserve",
+    "titleLine1": "Book your",
+    "titleLine2": "appointment.",
+    "intro": "Four steps. No account needed. Confirmation by email.",
+    "stepService": "Service",
+    "stepBarber": "Barber",
+    "stepDatetime": "Date & time",
+    "stepDetails": "Details",
+    "stepConfirm": "Confirm",
+    "sideHelp": "Prefer to call or walk in? Walk-ins always welcome.",
+    "sideIg": "DM on Instagram ↗",
+    "pane1Eyebrow": "STEP 01 / 04",
+    "pane1Title": "Choose your service.",
+    "groupCuts": "Cuts",
+    "groupBeard": "Beard / Shave",
+    "groupCombo": "Combinations",
+    "serviceNames": {
+      "cut-adult": "Haircut",
+      "cut-kid": "Kids' cut",
+      "cut-senior": "Senior",
+      "beard-trim": "Beard trim",
+      "beard-shave": "Beard shave · hot towel",
+      "shave-classic": "Classic shave",
+      "combo-cut-beard": "Cut + beard",
+      "combo-cut-shave": "Cut + shave",
+      "combo-full": "The full service"
+    },
+    "serviceMeta": {
+      "cut-adult": "~30 min",
+      "cut-kid": "~25 min · ≤12 yrs",
+      "cut-senior": "~30 min · 65+",
+      "beard-trim": "~20 min",
+      "beard-shave": "~35 min",
+      "shave-classic": "~45 min",
+      "combo-cut-beard": "~50 min",
+      "combo-cut-shave": "~60 min",
+      "combo-full": "~75 min · cut + beard + shave"
+    },
+    "continue": "Continue →",
+    "back": "← Back",
+    "pane2Eyebrow": "STEP 02 / 04",
+    "pane2Title": "Who's cutting?",
+    "barberAny": "No preference",
+    "barberAnyDesc": "We'll pick the first open chair.",
+    "barberSamir": "Samir Yılmaz",
+    "barberSamirDesc": "Senior · shave · razor",
+    "barberMehmet": "Mehmet Demir",
+    "barberMehmetDesc": "Modern · fades · trim",
+    "pane3Eyebrow": "STEP 03 / 04",
+    "pane3Title": "When works?",
+    "pickDay": "Pick a day",
+    "pickTime": "Pick a time",
+    "pickDayFirst": "Pick a day first.",
+    "closedLabel": "Closed",
+    "pane4Eyebrow": "STEP 04 / 04",
+    "pane4Title": "Your details.",
+    "nameLabel": "Name *",
+    "phoneLabel": "Phone *",
+    "emailLabel": "Email (optional)",
+    "notesLabel": "Notes (optional)",
+    "phonePlaceholder": "06 12345678",
+    "emailPlaceholder": "name@example.com",
+    "notesPlaceholder": "E.g. prefer a quiet time, or a specific request.",
+    "errName": "Enter your name.",
+    "errPhone": "Not a valid phone number.",
+    "toConfirm": "To confirmation →",
+    "pane5Eyebrow": "— CONFIRM",
+    "pane5Title": "Looks right?",
+    "confService": "Service",
+    "confBarber": "Barber",
+    "confWhen": "Date & time",
+    "confName": "Name",
+    "confPhone": "Phone",
+    "confEmail": "Email",
+    "confNotes": "Notes",
+    "confPrice": "To pay on site",
+    "confirmNote": "You'll get a confirmation by SMS and, if provided, email. Pay with card, cash or contactless at the shop.",
+    "editBack": "← Edit",
+    "confirmBtn": "Confirm booking",
+    "submitting": "Working…",
+    "submitError": "Something went wrong. Try again or call us.",
+    "successTitle": "See you in the chair.",
+    "successBody": "Your booking is in. Keep this confirmation handy — or drop it in your calendar.",
+    "refLabel": "Reference",
+    "toHome": "← Back to home",
+    "another": "Make another",
+    "dateLocale": "en-GB"
+  }
+}
