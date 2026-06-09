@@ -1,0 +1,138 @@
+{
+  "projectSlug": "samir-kapsalon",
+  "endpoint": "https://cms-backend-roman.vercel.app/content",
+  "locales": [
+    "nl",
+    "en"
+  ],
+  "defaultLocale": "nl",
+  "services": {
+    "general_brand_name": {
+      "type": "text_block",
+      "page": "General"
+    },
+    "contact_info": {
+      "type": "key_value",
+      "page": "General"
+    },
+    "opening_hours": {
+      "type": "repeater",
+      "page": "General"
+    },
+    "footer": {
+      "type": "key_value",
+      "page": "General"
+    },
+    "hero": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "hero_image": {
+      "type": "image",
+      "page": "Home"
+    },
+    "trust_band": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "services_teaser": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "services_teaser_items": {
+      "type": "repeater",
+      "page": "Home"
+    },
+    "about": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "about_images": {
+      "type": "gallery",
+      "page": "Home"
+    },
+    "gallery_teaser": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "gallery_teaser_images": {
+      "type": "gallery",
+      "page": "Home"
+    },
+    "reviews_section": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "reviews_items": {
+      "type": "repeater",
+      "page": "Home"
+    },
+    "instagram": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "instagram_images": {
+      "type": "gallery",
+      "page": "Home"
+    },
+    "location_strip": {
+      "type": "key_value",
+      "page": "Home"
+    },
+    "diensten_header": {
+      "type": "key_value",
+      "page": "Services"
+    },
+    "service_menu": {
+      "type": "repeater",
+      "page": "Services"
+    },
+    "service_notes": {
+      "type": "repeater",
+      "page": "Services"
+    },
+    "team_header": {
+      "type": "key_value",
+      "page": "Team"
+    },
+    "team_members": {
+      "type": "repeater",
+      "page": "Team"
+    },
+    "team_careers": {
+      "type": "key_value",
+      "page": "Team"
+    },
+    "gallery_header": {
+      "type": "key_value",
+      "page": "Gallery"
+    },
+    "gallery_images": {
+      "type": "gallery",
+      "page": "Gallery"
+    },
+    "contact_content": {
+      "type": "key_value",
+      "page": "Contact"
+    },
+    "booking_page_header": {
+      "type": "key_value",
+      "page": "Book"
+    }
+  },
+  "booking": {
+    "slug": "samir-kapsalon",
+    "apiBase": "https://cms-backend-roman.vercel.app/booking",
+    "contractVersion": "1.0.0",
+    "fieldMapping": {
+      "service_id": "service",
+      "start_utc": "startAt",
+      "customer.name": "name",
+      "customer.email": "email",
+      "resource_id": "barber",
+      "note": "notes",
+      "customer.phone": "phone",
+      "customer.locale": "locale"
+    }
+  }
+}

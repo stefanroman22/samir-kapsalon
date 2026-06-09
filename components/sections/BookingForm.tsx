@@ -1,53 +1,77 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { BUSINESS, BOOKING_SERVICES, OPENING_HOURS, BARBER_PORTRAITS } from "@/lib/site";
+import { BUSINESS } from "@/lib/site";
+import {
+  getServices,
+  getResources,
+  getAvailability,
+  createBooking,
+  type Service,
+  type Resource,
+} from "@/lib/booking";
 
+// Dynamic, backend-driven booking. Services, staff and per-barber availability are
+// fetched live from the CMS booking API (see lib/booking.ts) so the form auto-adjusts
+// when the owner adds/removes staff or services or changes the timetable. The flow is
+// service → barber (or "no preference") → that barber's real free slots → details.
 const STORE = "samir.booking";
+const TZ = "Europe/Amsterdam"; // slot instants are UTC; display in the shop's timezone
+const WINDOW_DAYS = 14;
 
 type State = {
   step: number;
   serviceId: string | null;
-  barberId: string | null;
-  date: string | null; // yyyy-mm-dd
-  time: string | null; // HH:MM
+  barberId: string; // "" = no preference (server auto-assigns)
+  date: string | null; // yyyy-mm-dd (shop-local)
+  slot: string | null; // selected slot start_utc (ISO)
   name: string;
   phone: string;
   email: string;
   notes: string;
   ref: string | null;
+  manageUrl: string | null;
 };
 
 const INITIAL: State = {
   step: 1,
   serviceId: null,
-  barberId: null,
+  barberId: "",
   date: null,
-  time: null,
+  slot: null,
   name: "",
   phone: "",
   email: "",
   notes: "",
   ref: null,
+  manageUrl: null,
 };
 
-const fmtISO = (d: Date) => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
-const dow = (d: Date) => (d.getDay() + 6) % 7; // Mon=0 … Sun=6
+/** yyyy-mm-dd for a UTC instant, in the shop timezone. */
+function shopDate(iso: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(iso));
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function shopTime(iso: string, dateLocale: string): string {
+  return new Intl.DateTimeFormat(dateLocale, {
+    timeZone: TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
 
 export function BookingForm() {
   const t = useTranslations("booking");
-  const locale = useLocale();
   const dateLocale = t("dateLocale");
-  const search = useSearchParams();
 
   const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<State>(INITIAL);
@@ -55,22 +79,27 @@ export function BookingForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(false);
 
-  // Load persisted state + apply ?barber prefill, after mount (avoids SSR mismatch).
+  // Backend data
+  const [services, setServices] = useState<Service[] | null>(null);
+  const [resources, setResources] = useState<Resource[] | null>(null);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [slotsByDate, setSlotsByDate] = useState<Record<string, string[]> | null>(null);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+
+  const patch = useCallback((p: Partial<State>) => setState((s) => ({ ...s, ...p })), []);
+
+  // Restore persisted draft after mount (avoids SSR mismatch).
   useEffect(() => {
-    let next: State = { ...INITIAL };
     try {
       const raw = sessionStorage.getItem(STORE);
-      if (raw) next = { ...INITIAL, ...JSON.parse(raw) };
+      if (raw) setState({ ...INITIAL, ...JSON.parse(raw) });
     } catch {
       /* ignore */
     }
-    const b = search.get("barber");
-    if (!next.barberId && (b === "samir" || b === "mehmet")) next.barberId = b;
-    setState(next);
     setMounted(true);
-  }, [search]);
+  }, []);
 
-  // Persist.
   useEffect(() => {
     if (!mounted) return;
     try {
@@ -80,86 +109,86 @@ export function BookingForm() {
     }
   }, [state, mounted]);
 
-  // ---- Derived service catalogue (localized) ----
-  const services = useMemo(() => {
-    return BOOKING_SERVICES.map((g) => ({
-      group: g.group,
-      title: t(`group${g.group === "cuts" ? "Cuts" : g.group === "beard" ? "Beard" : "Combo"}`),
-      items: g.items.map((it) => ({
-        ...it,
-        name: t(`serviceNames.${it.id}`),
-        meta: t(`serviceMeta.${it.id}`),
-        label: `${t(`serviceNames.${it.id}`)} — €${it.price}`,
-      })),
-    }));
-  }, [t]);
+  // Load services once on mount.
+  useEffect(() => {
+    let alive = true;
+    getServices()
+      .then((s) => alive && setServices(s))
+      .catch(() => alive && setLoadError(true));
+    return () => {
+      alive = false;
+    };
+  }, []);
 
-  const allServices = useMemo(() => services.flatMap((g) => g.items), [services]);
-  const service = allServices.find((s) => s.id === state.serviceId) ?? null;
+  const service = services?.find((s) => s.id === state.serviceId) ?? null;
 
-  const barbers = [
-    { id: "any", name: t("barberAny"), desc: t("barberAnyDesc"), portrait: null as string | null },
-    { id: "samir", name: t("barberSamir"), desc: t("barberSamirDesc"), portrait: BARBER_PORTRAITS.samir },
-    { id: "mehmet", name: t("barberMehmet"), desc: t("barberMehmetDesc"), portrait: BARBER_PORTRAITS.mehmet },
-  ];
-  const barber = barbers.find((b) => b.id === state.barberId) ?? null;
-
-  // ---- Date strip (next 7 days) ----
-  const days = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      return d;
-    });
-  }, [mounted]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ---- Time slots for the selected date ----
-  const times = useMemo(() => {
-    if (!state.date) return null;
-    const d = new Date(state.date + "T00:00");
-    const win = OPENING_HOURS[dow(d)];
-    if (!win) return { closed: true as const, label: t("closedLabel"), slots: [] as { label: string; disabled: boolean }[] };
-    const mins = service?.mins ?? 30;
-    const [oh, om] = win.open.split(":").map(Number);
-    const [ch, cm] = win.close.split(":").map(Number);
-    const start = oh * 60 + om;
-    const end = ch * 60 + cm - mins;
-    // deterministic "already booked" slots so availability feels real
-    const seed = [...state.date].reduce((a, c) => a + c.charCodeAt(0), 0);
-    const taken = new Set<number>();
-    const span = Math.max(1, Math.floor((end - start) / 30));
-    for (let i = 0; i < 4; i++) taken.add(start + ((seed * (i + 1) * 13) % span) * 30);
-    const now = new Date();
-    const nowMins = now.getHours() * 60 + now.getMinutes();
-    const isToday = state.date === fmtISO(now);
-    const slots: { label: string; disabled: boolean }[] = [];
-    for (let m = start; m <= end; m += 30) {
-      const label = `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-      slots.push({ label, disabled: taken.has(m) || (isToday && m < nowMins) });
+  // Load eligible barbers whenever the chosen service changes.
+  useEffect(() => {
+    if (!state.serviceId) {
+      setResources(null);
+      return;
     }
-    return { closed: false as const, label: `${win.open} — ${win.close}`, slots };
-  }, [state.date, service, t]);
+    let alive = true;
+    setResourcesLoading(true);
+    getResources(state.serviceId)
+      .then((r) => alive && setResources(r))
+      .catch(() => alive && setLoadError(true))
+      .finally(() => alive && setResourcesLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [state.serviceId]);
 
-  // ---- Helpers ----
-  const patch = (p: Partial<State>) => setState((s) => ({ ...s, ...p }));
+  // Load availability whenever service or barber changes (the per-barber calendar).
+  useEffect(() => {
+    if (!state.serviceId) {
+      setSlotsByDate(null);
+      return;
+    }
+    let alive = true;
+    setSlotsLoading(true);
+    const now = new Date();
+    const from = shopDate(now.toISOString());
+    const to = shopDate(new Date(now.getTime() + WINDOW_DAYS * 86400_000).toISOString());
+    getAvailability(state.serviceId, from, to, state.barberId || undefined)
+      .then((days) => {
+        if (!alive) return;
+        const map: Record<string, string[]> = {};
+        for (const d of days) {
+          for (const slot of d.slots) {
+            const key = shopDate(slot.start_utc);
+            (map[key] ??= []).push(slot.start_utc);
+          }
+        }
+        setSlotsByDate(map);
+      })
+      .catch(() => alive && setLoadError(true))
+      .finally(() => alive && setSlotsLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [state.serviceId, state.barberId]);
+
+  const availableDates = useMemo(
+    () => (slotsByDate ? Object.keys(slotsByDate).sort() : []),
+    [slotsByDate]
+  );
+  const daySlots = state.date && slotsByDate ? (slotsByDate[state.date] ?? []) : [];
+  const barber = resources?.find((b) => b.id === state.barberId) ?? null;
+
   const goto = (step: number) => {
     patch({ step });
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const fmtWhen = () => {
-    if (!state.date || !state.time) return "—";
-    const d = new Date(state.date + "T00:00");
-    return `${d.toLocaleDateString(dateLocale, { weekday: "short", day: "numeric", month: "short" })} · ${state.time}`;
-  };
+  const fmtWhen = () => (state.slot ? `${shopDate(state.slot)} · ${shopTime(state.slot, dateLocale)}` : "—");
+  const barberName = state.barberId ? (barber?.name ?? "—") : t("barberAny");
 
   const phoneValid = /^[\d\s+\-()]{6,}$/.test(state.phone);
   const can: Record<number, boolean> = {
     1: !!state.serviceId,
-    2: !!state.barberId,
-    3: !!state.date && !!state.time,
+    2: !!state.serviceId, // a barber OR "no preference" (barberId "") is always valid
+    3: !!state.slot,
     4: state.name.trim().length >= 2 && phoneValid,
   };
 
@@ -172,26 +201,27 @@ export function BookingForm() {
   };
 
   const submit = async () => {
+    if (!state.serviceId || !state.slot) return;
     setSubmitting(true);
     setSubmitError(false);
     try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          service: state.serviceId,
-          barber: state.barberId,
-          startAt: `${state.date}T${state.time}`,
-          name: state.name,
-          phone: state.phone,
-          email: state.email,
-          notes: state.notes,
-          locale,
-        }),
+      const res = await createBooking({
+        service_id: state.serviceId,
+        resource_id: state.barberId || undefined,
+        start_utc: state.slot,
+        customer: {
+          name: state.name.trim(),
+          email: state.email.trim(),
+          phone: state.phone.trim() || undefined,
+          tz: TZ,
+        },
+        note: state.notes.trim() || undefined,
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error("failed");
-      patch({ ref: data.reference, step: 6 });
+      patch({
+        ref: res.booking_id ?? null,
+        manageUrl: res.manage_url ?? null,
+        step: 6,
+      });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setSubmitError(true);
@@ -201,8 +231,8 @@ export function BookingForm() {
   };
 
   const stepDefs = [
-    { n: 1, label: t("stepService"), pick: service ? service.label : "—" },
-    { n: 2, label: t("stepBarber"), pick: barber ? barber.name : "—" },
+    { n: 1, label: t("stepService"), pick: service ? service.name : "—" },
+    { n: 2, label: t("stepBarber"), pick: state.serviceId ? barberName : "—" },
     { n: 3, label: t("stepDatetime"), pick: fmtWhen() },
     { n: 4, label: t("stepDetails"), pick: state.name ? `${state.name}${state.phone ? " · " + state.phone : ""}` : "—" },
     { n: 5, label: t("stepConfirm"), pick: null },
@@ -210,8 +240,8 @@ export function BookingForm() {
 
   const confirmRows = (withRef: boolean) => (
     <dl className="confirm-list">
-      <div><dt>{t("confService")}</dt><dd>{service?.label ?? "—"}</dd></div>
-      <div><dt>{t("confBarber")}</dt><dd>{barber?.name ?? "—"}</dd></div>
+      <div><dt>{t("confService")}</dt><dd>{service?.name ?? "—"}</dd></div>
+      <div><dt>{t("confBarber")}</dt><dd>{barberName}</dd></div>
       <div><dt>{t("confWhen")}</dt><dd>{fmtWhen()}</dd></div>
       {withRef ? (
         <div><dt>{t("refLabel")}</dt><dd>{state.ref ?? "—"}</dd></div>
@@ -221,7 +251,6 @@ export function BookingForm() {
           <div><dt>{t("confPhone")}</dt><dd>{state.phone || "—"}</dd></div>
           <div><dt>{t("confEmail")}</dt><dd>{state.email || "—"}</dd></div>
           <div><dt>{t("confNotes")}</dt><dd>{state.notes || "—"}</dd></div>
-          <div className="confirm-price"><dt>{t("confPrice")}</dt><dd>{service ? "€" + service.price : "—"}</dd></div>
         </>
       )}
     </dl>
@@ -258,28 +287,27 @@ export function BookingForm() {
             <span className="eyebrow">{t("pane1Eyebrow")}</span>
             <h2 className="display step-pane-title">{t("pane1Title")}</h2>
           </header>
-          <div className="svc-groups">
-            {services.map((g) => (
-              <div className="svc-mini" key={g.group}>
-                <h3 className="eyebrow svc-mini-title">{g.title}</h3>
-                <div className="svc-mini-list">
-                  {g.items.map((it) => (
-                    <button
-                      key={it.id}
-                      type="button"
-                      className={`svc-pill${state.serviceId === it.id ? " is-active" : ""}`}
-                      aria-pressed={state.serviceId === it.id}
-                      onClick={() => patch({ serviceId: it.id })}
-                    >
-                      <span className="display svc-pill-name">{it.name}</span>
-                      <span className="t-12 text-muted">{it.meta}</span>
-                      <span className="svc-pill-price">€{it.price}</span>
-                    </button>
-                  ))}
-                </div>
+          {loadError && <p className="field-error">{t("submitError")}</p>}
+          {!services && !loadError ? (
+            <div className="time-empty">…</div>
+          ) : (
+            <div className="svc-mini">
+              <div className="svc-mini-list">
+                {services?.map((it) => (
+                  <button
+                    key={it.id}
+                    type="button"
+                    className={`svc-pill${state.serviceId === it.id ? " is-active" : ""}`}
+                    aria-pressed={state.serviceId === it.id}
+                    onClick={() => patch({ serviceId: it.id, date: null, slot: null })}
+                  >
+                    <span className="display svc-pill-name">{it.name}</span>
+                    <span className="t-12 text-muted">~{it.duration_min} min</span>
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
           <div className="step-actions">
             <span />
             <button type="button" className="btn btn--accent btn--lg" disabled={!can[1]} onClick={() => goto(2)}>
@@ -295,25 +323,31 @@ export function BookingForm() {
             <h2 className="display step-pane-title">{t("pane2Title")}</h2>
           </header>
           <div className="barber-grid">
-            {barbers.map((b) => (
+            <button
+              type="button"
+              className={`barber-card${state.barberId === "" ? " is-active" : ""}`}
+              aria-pressed={state.barberId === ""}
+              onClick={() => patch({ barberId: "", date: null, slot: null })}
+            >
+              <div className="barber-portrait barber-portrait--any">
+                <span className="display">?</span>
+              </div>
+              <span className="display barber-name">{t("barberAny")}</span>
+              <span className="t-14 text-muted">{t("barberAnyDesc")}</span>
+            </button>
+            {resourcesLoading && <div className="time-empty">…</div>}
+            {resources?.map((b) => (
               <button
                 key={b.id}
                 type="button"
                 className={`barber-card${state.barberId === b.id ? " is-active" : ""}`}
                 aria-pressed={state.barberId === b.id}
-                onClick={() => patch({ barberId: b.id })}
+                onClick={() => patch({ barberId: b.id, date: null, slot: null })}
               >
-                {b.portrait ? (
-                  <div className="editorial barber-portrait" data-placeholder="true">
-                    <Image src={b.portrait} alt={b.name} fill sizes="(max-width: 640px) 100vw, 33vw" style={{ objectFit: "cover" }} />
-                  </div>
-                ) : (
-                  <div className="barber-portrait barber-portrait--any">
-                    <span className="display">?</span>
-                  </div>
-                )}
+                <div className="barber-portrait barber-portrait--any">
+                  <span className="display">{b.name.charAt(0)}</span>
+                </div>
                 <span className="display barber-name">{b.name}</span>
-                <span className="t-14 text-muted">{b.desc}</span>
               </button>
             ))}
           </div>
@@ -336,17 +370,19 @@ export function BookingForm() {
               <span className="t-12 eyebrow">{t("pickDay")}</span>
             </div>
             <div className="date-strip">
-              {mounted &&
-                days.map((d) => {
-                  const iso = fmtISO(d);
-                  const closed = OPENING_HOURS[dow(d)] === null;
+              {slotsLoading && <div className="time-empty">…</div>}
+              {!slotsLoading && availableDates.length === 0 && (
+                <div className="time-empty">{t("closedLabel")}</div>
+              )}
+              {!slotsLoading &&
+                availableDates.map((iso) => {
+                  const d = new Date(iso + "T00:00");
                   return (
                     <button
                       key={iso}
                       type="button"
                       className={`date-cell${state.date === iso ? " is-active" : ""}`}
-                      disabled={closed}
-                      onClick={() => patch({ date: iso, time: null })}
+                      onClick={() => patch({ date: iso, slot: null })}
                     >
                       <span className="date-cell-dow">{d.toLocaleDateString(dateLocale, { weekday: "short" })}</span>
                       <span className="date-cell-day">{d.getDate()}</span>
@@ -360,23 +396,21 @@ export function BookingForm() {
           <div className="timepicker mt-32">
             <div className="datepicker-head">
               <span className="t-12 eyebrow">{t("pickTime")}</span>
-              <span className="t-12 text-muted">{times && !times.closed ? times.label : "—"}</span>
             </div>
             <div className="time-grid">
-              {!times ? (
+              {!state.date ? (
                 <div className="time-empty">{t("pickDayFirst")}</div>
-              ) : times.closed ? (
+              ) : daySlots.length === 0 ? (
                 <div className="time-empty">{t("closedLabel")}</div>
               ) : (
-                times.slots.map((slot) => (
+                daySlots.map((iso) => (
                   <button
-                    key={slot.label}
+                    key={iso}
                     type="button"
-                    className={`time-cell${state.time === slot.label ? " is-active" : ""}`}
-                    disabled={slot.disabled}
-                    onClick={() => patch({ time: slot.label })}
+                    className={`time-cell${state.slot === iso ? " is-active" : ""}`}
+                    onClick={() => patch({ slot: iso })}
                   >
-                    {slot.label}
+                    {shopTime(iso, dateLocale)}
                   </button>
                 ))
               )}
@@ -470,11 +504,16 @@ export function BookingForm() {
           <h2 className="display step-pane-title mt-24">{t("successTitle")}</h2>
           <p className="lead mt-16">{t("successBody")}</p>
           <div className="mt-32">{confirmRows(true)}</div>
+          {state.manageUrl ? (
+            <p className="t-14 mt-16">
+              <a href={state.manageUrl} target="_blank" rel="noopener"><strong>{t("confWhen")} ↗</strong></a>
+            </p>
+          ) : null}
           <div className="step-actions">
             <Link className="btn btn--ghost" href="/">{t("toHome")}</Link>
             <button
               type="button" className="btn btn--accent"
-              onClick={() => { setState(INITIAL); setErrors({}); setSubmitError(false); }}
+              onClick={() => { setState({ ...INITIAL }); setErrors({}); setSubmitError(false); }}
             >
               {t("another")}
             </button>

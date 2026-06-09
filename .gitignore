@@ -43,3 +43,6 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# CMS connector (admin-kept; not for client repo)
+cms-provision.json
