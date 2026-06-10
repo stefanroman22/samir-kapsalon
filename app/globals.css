@@ -1217,8 +1217,10 @@ html.js .reveal.is-visible {
 /* The page wraps the shell in `.section.booking-app`; tighten its vertical
    padding so the booking screen sits just under the page header rather than
    floating in the middle of a tall section. */
-.booking-app { padding: 24px 0 48px; }
-@media (min-width: 1024px) { .booking-app { padding: 32px 0 64px; } }
+/* Top padding CLEARS the fixed .site-header (so it never overlaps the booking
+   top bar / back button), with breathing room. */
+.booking-app { padding: 104px 0 24px; }
+@media (min-width: 768px) { .booking-app { padding: 120px 0 40px; } }
 .fr-shell {
   position: relative;
   display: flex;
@@ -1227,10 +1229,13 @@ html.js .reveal.is-visible {
   background: var(--card);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  /* Tall enough to feel like a dedicated booking screen, but never taller than
-     the viewport beneath the page header so the sticky summary has room. */
-  min-height: 560px;
+  /* Bound the shell to the viewport BELOW the fixed header so the booking is a
+     self-contained screen: only the inner regions scroll, the page itself does
+     NOT. Same model on mobile + desktop. (= 100svh − top padding − bottom padding.) */
+  height: calc(100svh - 128px);
+  min-height: 480px;
 }
+@media (min-width: 768px) { .fr-shell { height: calc(100svh - 160px); } }
 .btn:disabled { opacity: 0.35; pointer-events: none; }
 
 /* ---------- Top bar: back · breadcrumb · close ---------- */
@@ -1298,9 +1303,9 @@ html.js .reveal.is-visible {
 @media (min-width: 768px) {
   .fr-left {
     padding: 32px 36px 40px;
-    /* Cap to the viewport beneath the page header so only THIS column scrolls,
-       while the sticky summary stays put. */
-    max-height: calc(100svh - 160px);
+    /* The shell is height-bounded; this column fills the body row and scrolls
+       inside it (only this column moves, never the page). */
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
@@ -1508,10 +1513,10 @@ html.js .reveal.is-visible {
 }
 @media (min-width: 768px) {
   .fr-summary {
-    position: sticky;
-    top: 0;
-    align-self: start;
-    height: calc(100svh - 160px);
+    /* Fills the body row (shell is height-bounded); its inner scroll handles
+       overflow while the Doorgaan button stays pinned at the card bottom. */
+    height: 100%;
+    min-height: 0;
     border-top: 0;
     border-left: 1px solid var(--border);
   }
@@ -1552,11 +1557,20 @@ html.js .reveal.is-visible {
 }
 
 /* ---------- Mobile: one step + sticky bottom bar ---------- */
-.fr-mobile { display: flex; flex-direction: column; flex: 1 1 auto; }
-.fr-mobile-step { padding: 24px 20px 28px; flex: 1 1 auto; }
+.fr-mobile { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+/* INNER scroll: only the active step's content scrolls — the top bar + bottom
+   action bar stay fixed, so the page never scrolls and the user never gets lost
+   hunting for the dates/times. */
+.fr-mobile-step {
+  padding: 24px 20px 28px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
 .fr-bottombar {
-  position: sticky;
-  bottom: 0;
+  flex: 0 0 auto;
   z-index: 4;
   display: flex;
   align-items: center;
@@ -1574,7 +1588,7 @@ html.js .reveal.is-visible {
 .fr-bottombar-btn { flex: 0 0 auto; }
 
 /* ---------- Success screen ---------- */
-.fr-shell--done { padding: 36px 24px 40px; }
+.fr-shell--done { padding: 36px 24px 40px; align-items: center; justify-content: center; }
 @media (min-width: 768px) { .fr-shell--done { padding: 56px 48px; } }
 .fr-success { display: flex; flex-direction: column; align-items: flex-start; max-width: 640px; }
 .fr-success-title { font-size: clamp(32px, 5vw, 56px); line-height: 0.95; letter-spacing: -0.01em; text-transform: uppercase; margin-top: 24px; }
