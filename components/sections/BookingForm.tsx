@@ -712,23 +712,57 @@ export function BookingForm() {
     </aside>
   );
 
-  // Mobile sticky bottom bar: total + Doorgaan, always visible.
+  // Mobile bottom bar: the running selection (service · barber · time) stays
+  // visible at ALL times and fills in as the user picks — so on mobile you can
+  // always see what you've chosen, including on the final step. Plus total + action.
+  const mobileMetaBits: string[] = [];
+  if (service && state.step >= 2) {
+    mobileMetaBits.push(t("durationWith", { duration: service.duration_min, who: barberName }));
+  }
+  if (service && state.slot && slotEndIso) {
+    const d = new Date(state.slot).toLocaleDateString(dateLocale, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
+    mobileMetaBits.push(`${d} ${shopTime(state.slot, dateLocale)}`);
+  }
+  const mobileMeta = mobileMetaBits.join(" · ");
+
   const mobileBar = (
     <div className="fr-bottombar">
-      <div className="fr-bottombar-total">
-        <span className="fr-bottombar-label">{t("total")}</span>
-        <span className="display fr-bottombar-value">
-          {service ? (serviceIsFree ? t("free") : (servicePrice ?? "—")) : "—"}
-        </span>
+      <AnimatePresence initial={false}>
+        {service && (
+          <motion.div
+            key="picks"
+            className="fr-bb-picks"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: reduce ? 0.12 : 0.22, ease: [0.2, 0, 0, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <span className="fr-bb-name">{service.name}</span>
+            {mobileMeta && <span className="fr-bb-meta text-muted">{mobileMeta}</span>}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="fr-bb-action">
+        <div className="fr-bottombar-total">
+          <span className="fr-bottombar-label">{t("total")}</span>
+          <span className="display fr-bottombar-value">
+            {service ? (serviceIsFree ? t("free") : (servicePrice ?? "—")) : "—"}
+          </span>
+        </div>
+        <button
+          type="button"
+          className="btn btn--accent btn--lg fr-bottombar-btn"
+          disabled={doorgaanDisabled}
+          onClick={doorgaan}
+        >
+          {doorgaanLabel}
+        </button>
       </div>
-      <button
-        type="button"
-        className="btn btn--accent btn--lg fr-bottombar-btn"
-        disabled={doorgaanDisabled}
-        onClick={doorgaan}
-      >
-        {doorgaanLabel}
-      </button>
     </div>
   );
 
