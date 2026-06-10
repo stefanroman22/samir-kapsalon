@@ -14,7 +14,11 @@ export const BUSINESS = {
   country: "NL",
   geo: { lat: 51.8314177, lng: 5.8438964 },
   rating: "4.8",
+  // reviewCount: numeric, ONLY for Schema.org aggregateRating (must be a number).
   reviewCount: "105",
+  // reviewCountDisplay: what users SEE — rounded "X+" so it never goes stale and the
+  // owner doesn't have to bump it after every new review (no live Google Maps sync).
+  reviewCountDisplay: "100+",
   priceRange: "€€",
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=hairdresser+Samir+Groenestraat+277+Nijmegen",

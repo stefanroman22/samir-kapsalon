@@ -620,7 +620,7 @@ export function BookingForm() {
           <span className="display fr-biz-name">{BUSINESS.wordmark}</span>
           <span className="fr-biz-rating">
             {BUSINESS.rating} <span className="fr-star" aria-hidden="true">★</span>{" "}
-            <span className="text-muted">({BUSINESS.reviewCount})</span>
+            <span className="text-muted">({BUSINESS.reviewCountDisplay})</span>
           </span>
           <span className="fr-biz-addr text-muted">{BUSINESS.street}, {BUSINESS.city}</span>
         </div>
