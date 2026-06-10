@@ -26,27 +26,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BoekPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("booking");
 
+  // The booking shell is the whole screen — it has its own breadcrumb + step
+  // headings, so no separate page header is rendered above it.
   return (
-    <>
-      <section className="boek-header">
-        <div className="container">
-          <span className="eyebrow eyebrow--accent">{t("headerEyebrow")}</span>
-          <h1 className="display boek-title">
-            {t("titleLine1")} <span className="text-accent">{t("titleLine2")}</span>
-          </h1>
-          <p className="lead mt-16">{t("intro")}</p>
-        </div>
-      </section>
-
-      <section className="section booking-app">
-        <div className="container">
-          <Suspense fallback={null}>
-            <BookingForm />
-          </Suspense>
-        </div>
-      </section>
-    </>
+    <section className="section booking-app">
+      <div className="container">
+        <Suspense fallback={null}>
+          <BookingForm />
+        </Suspense>
+      </div>
+    </section>
   );
 }

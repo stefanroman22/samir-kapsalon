@@ -17,7 +17,9 @@ import {
 // Dynamic, backend-driven booking. Services, staff and per-barber availability are
 // fetched live from the CMS booking API (see lib/booking.ts) so the form auto-adjusts
 // when the owner adds/removes staff or services or changes the timetable. The flow is
-// service → barber (or "no preference") → that barber's real free slots → details.
+// a Fresha/Treatwell-style two-column screen: the LEFT column holds the active step and
+// scrolls; the RIGHT column is a sticky summary card whose primary "Doorgaan" action is
+// always reachable. On mobile the summary collapses to a sticky bottom bar.
 const STORE = "samir.booking";
 const TZ = "Europe/Amsterdam"; // slot instants are UTC; display in the shop's timezone
 const WINDOW_DAYS = 14;
@@ -78,7 +80,7 @@ function shopTime(iso: string, dateLocale: string): string {
 function fmtPrice(price?: number): string | null {
   if (price == null || Number.isNaN(price)) return null;
   const body = Number.isInteger(price) ? String(price) : price.toFixed(2);
-  return `€${body}`;
+  return `€ ${body}`;
 }
 
 /** A field label from i18n, with any baked-in required/optional marker stripped so
@@ -94,7 +96,7 @@ function optionalMarker(raw: string): string {
 }
 
 /** Track the mobile breakpoint (<768px) so we can switch between the desktop
- *  side-stepper (all panes, CSS-hidden) and the mobile one-screen flow. */
+ *  two-column layout (sticky summary) and the mobile one-step-with-bottom-bar flow. */
 function useIsMobile(): boolean {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -106,6 +108,40 @@ function useIsMobile(): boolean {
   }, []);
   return isMobile;
 }
+
+// --- small inline icons (stroke = currentColor, sized via CSS) --------------------
+const IconBack = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+);
+const IconClose = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+);
+const IconPlus = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+const IconCheck = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
+const IconCal = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </svg>
+);
+const IconClock = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
 
 export function BookingForm() {
   const t = useTranslations("booking");
@@ -165,6 +201,8 @@ export function BookingForm() {
 
   const service = services?.find((s) => s.id === state.serviceId) ?? null;
   const servicePrice = fmtPrice(service?.price);
+  // "free" when the backend reports an explicit 0 price.
+  const serviceIsFree = service != null && service.price === 0;
 
   // Load eligible barbers whenever the chosen service changes.
   useEffect(() => {
@@ -219,18 +257,21 @@ export function BookingForm() {
   );
   const daySlots = state.date && slotsByDate ? (slotsByDate[state.date] ?? []) : [];
   const barber = resources?.find((b) => b.id === state.barberId) ?? null;
+  const barberName = state.barberId ? (barber?.name ?? "—") : t("noPreference");
 
-  // Step change. Auto-scroll was removed: on desktop everything fits in-viewport,
-  // and on mobile the active step is swapped in place — so the page never jumps.
   const goto = (step: number) => patch({ step });
 
-  const fmtWhen = () => (state.slot ? `${shopDate(state.slot)} · ${shopTime(state.slot, dateLocale)}` : "—");
-  const barberName = state.barberId ? (barber?.name ?? "—") : t("barberAny");
+  // --- end of the chosen slot, for the "{start}–{end}" summary line. ---------------
+  const slotEndIso = useMemo(() => {
+    if (!state.slot || !service) return null;
+    return new Date(new Date(state.slot).getTime() + service.duration_min * 60_000).toISOString();
+  }, [state.slot, service]);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email.trim());
-  // Phone is now OPTIONAL — only validate format when something was entered.
+  // Phone is OPTIONAL — only validate format when something was entered.
   const phoneEntered = state.phone.trim().length > 0;
   const phoneValid = !phoneEntered || /^[\d\s+\-()]{6,}$/.test(state.phone);
+  // Per-step validity gates the sticky "Doorgaan" button.
   const can: Record<number, boolean> = {
     1: !!state.serviceId,
     2: !!state.serviceId, // a barber OR "no preference" (barberId "") is always valid
@@ -241,8 +282,6 @@ export function BookingForm() {
   const validateContact = () => {
     const e: { name?: string; phone?: string; email?: string } = {};
     if (state.name.trim().length < 2) e.name = t("errName");
-    // Email is required: surface its invalid state via the red border (data-invalid)
-    // without inventing copy. The can[4] gate already blocks an invalid email.
     if (!emailValid) e.email = "";
     if (!phoneValid) e.phone = t("errPhone");
     setErrors(e);
@@ -273,7 +312,7 @@ export function BookingForm() {
         patch({
           ref: res.booking_id ?? null,
           manageUrl: res.manage_url ?? null,
-          step: 6,
+          step: 5,
         });
         setPhase("idle");
       };
@@ -285,212 +324,244 @@ export function BookingForm() {
     }
   };
 
-  const stepDefs = [
-    { n: 1, label: t("stepService"), pick: service ? service.name : "—" },
-    { n: 2, label: t("stepBarber"), pick: state.serviceId ? barberName : "—" },
-    { n: 3, label: t("stepDatetime"), pick: fmtWhen() },
-    { n: 4, label: t("stepDetails"), pick: state.name ? `${state.name}${state.phone ? " · " + state.phone : ""}` : "—" },
-    { n: 5, label: t("stepConfirm"), pick: null },
+  // ---- The shared "Doorgaan" advance: steps 1–3 just advance; step 4 submits. -----
+  const doorgaan = () => {
+    if (state.step === 4) {
+      if (validateContact()) submit();
+      return;
+    }
+    if (!can[state.step]) return;
+    goto(state.step + 1);
+  };
+
+  const back = () => {
+    if (state.step > 1) goto(state.step - 1);
+  };
+
+  // -------------------------------------------------------------------------------
+  // BREADCRUMB STEPPER — Services › Professional › Tijd › Bevestig
+  // active = bold/dark, completed = normal, upcoming = muted.
+  // -------------------------------------------------------------------------------
+  const crumbs = [
+    t("crumbServices"),
+    t("crumbProfessional"),
+    t("crumbTime"),
+    t("crumbConfirm"),
   ];
 
-  const confirmRows = (withRef: boolean) => (
-    <dl className="confirm-list">
-      <div><dt>{t("confService")}</dt><dd>{service?.name ?? "—"}</dd></div>
-      <div><dt>{t("confBarber")}</dt><dd>{barberName}</dd></div>
-      <div><dt>{t("confWhen")}</dt><dd>{fmtWhen()}</dd></div>
-      {servicePrice && !withRef ? (
-        <div className="confirm-price"><dt>{t("confPrice")}</dt><dd>{servicePrice}</dd></div>
-      ) : null}
-      {withRef ? (
-        <div><dt>{t("refLabel")}</dt><dd>{state.ref ?? "—"}</dd></div>
-      ) : (
-        <>
-          <div><dt>{t("confName")}</dt><dd>{state.name || "—"}</dd></div>
-          <div><dt>{t("confEmail")}</dt><dd>{state.email || "—"}</dd></div>
-          <div><dt>{t("confPhone")}</dt><dd>{state.phone || "—"}</dd></div>
-          <div><dt>{t("confNotes")}</dt><dd>{state.notes || "—"}</dd></div>
-        </>
-      )}
-    </dl>
-  );
-
-  // ---- Step bodies (shared between desktop panes + mobile single-screen flow) ----
-
-  const head = (eyebrow: string, title: string) => (
-    <header className="step-pane-head">
-      <span className="eyebrow">{eyebrow}</span>
-      <h2 className="display step-pane-title">{title}</h2>
-    </header>
-  );
-
-  // Back control rendered on mobile for EVERY navigable step (desktop keeps the
-  // Back button inside .step-actions). aria-label keeps it accessible.
-  const mobileBack = (toStep: number) =>
-    isMobile ? (
+  const TopBar = (
+    <div className="fr-topbar">
       <button
         type="button"
-        className="step-back"
-        aria-label={t("back")}
-        onClick={() => goto(toStep)}
+        className="fr-circle fr-back"
+        aria-label={t("backAria")}
+        onClick={back}
+        hidden={state.step === 1 || state.step === 5}
       >
-        {t("back")}
+        <IconBack />
       </button>
-    ) : null;
+      <nav className="fr-crumbs" aria-label={crumbs.join(" / ")}>
+        {crumbs.map((c, i) => {
+          const n = i + 1;
+          const status =
+            state.step === n ? "is-active" : state.step > n ? "is-done" : "is-upcoming";
+          return (
+            <span key={c} className="fr-crumb-item">
+              <span className={`fr-crumb ${status}`} aria-current={state.step === n ? "step" : undefined}>
+                {c}
+              </span>
+              {i < crumbs.length - 1 ? <span className="fr-crumb-sep" aria-hidden="true">›</span> : null}
+            </span>
+          );
+        })}
+      </nav>
+      <Link className="fr-circle fr-close" href="/" aria-label={t("closeAria")}>
+        <IconClose />
+      </Link>
+    </div>
+  );
+
+  // -------------------------------------------------------------------------------
+  // STEP BODIES (left column content)
+  // -------------------------------------------------------------------------------
 
   const step1Body = (
-    <>
-      {/* Step 1 has no previous step → no Back control. */}
-      {head(t("pane1Eyebrow"), t("pane1Title"))}
+    <div className="fr-step">
+      <header className="fr-step-head">
+        <h2 className="display fr-step-title">{t("servicesHeading")}</h2>
+        <p className="fr-step-sub eyebrow">{t("servicesSub")}</p>
+      </header>
       {loadError && <p className="field-error">{t("submitError")}</p>}
       {!services && !loadError ? (
-        <div className="time-empty">…</div>
+        <div className="fr-loading">…</div>
       ) : (
-        <div className="svc-mini">
-          <div className="svc-mini-list step-scroll">
-            {services?.map((it) => {
-              const p = fmtPrice(it.price);
-              return (
+        <ul className="fr-svc-list">
+          {services?.map((it) => {
+            const selected = state.serviceId === it.id;
+            const p = fmtPrice(it.price);
+            const free = it.price === 0;
+            return (
+              <li key={it.id}>
                 <button
-                  key={it.id}
                   type="button"
-                  className={`svc-pill${state.serviceId === it.id ? " is-active" : ""}`}
-                  aria-pressed={state.serviceId === it.id}
-                  onClick={() => patch({ serviceId: it.id, date: null, slot: null })}
+                  className={`fr-svc-card${selected ? " is-selected" : ""}`}
+                  aria-pressed={selected}
+                  onClick={() =>
+                    patch(
+                      selected
+                        ? { serviceId: null, date: null, slot: null }
+                        : { serviceId: it.id, date: null, slot: null }
+                    )
+                  }
                 >
-                  <span className="display svc-pill-name">{it.name}</span>
-                  {p ? <span className="display svc-pill-price">{p}</span> : null}
-                  <span className="t-12 text-muted">~{it.duration_min} min</span>
+                  <span className="fr-svc-main">
+                    <span className="fr-svc-name">{it.name}</span>
+                    <span className="fr-svc-dur">{it.duration_min} min</span>
+                  </span>
+                  <span className="fr-svc-foot">
+                    <span className="display fr-svc-price">{free ? t("free") : p}</span>
+                  </span>
+                  <span className="fr-svc-toggle" aria-hidden="true">
+                    {selected ? <IconCheck /> : <IconPlus />}
+                  </span>
                 </button>
-              );
-            })}
-          </div>
-        </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
-      <div className="step-actions">
-        <span />
-        <button type="button" className="btn btn--accent btn--lg" disabled={!can[1]} onClick={() => goto(2)}>
-          {t("continue")}
-        </button>
-      </div>
-    </>
+    </div>
   );
 
   const step2Body = (
-    <>
-      {mobileBack(1)}
-      {head(t("pane2Eyebrow"), t("pane2Title"))}
-      <div className="barber-grid step-scroll">
-        <button
-          type="button"
-          className={`barber-card${state.barberId === "" ? " is-active" : ""}`}
-          aria-pressed={state.barberId === ""}
-          onClick={() => patch({ barberId: "", date: null, slot: null })}
-        >
-          <div className="barber-portrait barber-portrait--any">
-            <span className="display">?</span>
-          </div>
-          <span className="display barber-name">{t("barberAny")}</span>
-          <span className="t-14 text-muted">{t("barberAnyDesc")}</span>
-        </button>
-        {resourcesLoading && <div className="time-empty">…</div>}
-        {resources?.map((b) => (
+    <div className="fr-step">
+      <header className="fr-step-head">
+        <h2 className="display fr-step-title">{t("professionalHeading")}</h2>
+      </header>
+      <ul className="fr-pro-list">
+        <li>
           <button
-            key={b.id}
             type="button"
-            className={`barber-card${state.barberId === b.id ? " is-active" : ""}`}
-            aria-pressed={state.barberId === b.id}
-            onClick={() => patch({ barberId: b.id, date: null, slot: null })}
+            className={`fr-pro-card${state.barberId === "" ? " is-selected" : ""}`}
+            aria-pressed={state.barberId === ""}
+            onClick={() => patch({ barberId: "", date: null, slot: null })}
           >
-            <div className="barber-portrait barber-portrait--any">
-              <span className="display">{b.name.charAt(0)}</span>
-            </div>
-            <span className="display barber-name">{b.name}</span>
+            <span className="fr-avatar fr-avatar--any" aria-hidden="true">?</span>
+            <span className="fr-pro-text">
+              <span className="fr-pro-name">{t("barberAny")}</span>
+              <span className="fr-pro-desc">{t("barberAnyDesc")}</span>
+            </span>
+            <span className={`fr-pill${state.barberId === "" ? " is-on" : ""}`}>
+              {state.barberId === "" ? <IconCheck /> : null}
+              {state.barberId === "" ? t("selectedAction") : t("selectAction")}
+            </span>
           </button>
-        ))}
-      </div>
-      <div className="step-actions">
-        <button type="button" className="btn btn--ghost" onClick={() => goto(1)}>{t("back")}</button>
-        <button type="button" className="btn btn--accent btn--lg" disabled={!can[2]} onClick={() => goto(3)}>
-          {t("continue")}
-        </button>
-      </div>
-    </>
+        </li>
+        {resourcesLoading && <li className="fr-loading">…</li>}
+        {resources?.map((b) => {
+          const selected = state.barberId === b.id;
+          return (
+            <li key={b.id}>
+              <button
+                type="button"
+                className={`fr-pro-card${selected ? " is-selected" : ""}`}
+                aria-pressed={selected}
+                onClick={() => patch({ barberId: b.id, date: null, slot: null })}
+              >
+                <span className="fr-avatar" aria-hidden="true">{b.name.charAt(0)}</span>
+                <span className="fr-pro-text">
+                  <span className="fr-pro-name">{b.name}</span>
+                </span>
+                <span className={`fr-pill${selected ? " is-on" : ""}`}>
+                  {selected ? <IconCheck /> : null}
+                  {selected ? t("selectedAction") : t("selectAction")}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 
   const step3Body = (
-    <>
-      {mobileBack(2)}
-      {head(t("pane3Eyebrow"), t("pane3Title"))}
-      <div className="step-scroll">
-        <div className="datepicker">
-          <div className="datepicker-head">
-            <span className="t-12 eyebrow">{t("pickDay")}</span>
-          </div>
-          <div className="date-strip">
-            {slotsLoading && <div className="time-empty">…</div>}
-            {!slotsLoading && availableDates.length === 0 && (
-              <div className="time-empty">{t("closedLabel")}</div>
-            )}
-            {!slotsLoading &&
-              availableDates.map((iso) => {
-                const d = new Date(iso + "T00:00");
-                return (
-                  <button
-                    key={iso}
-                    type="button"
-                    className={`date-cell${state.date === iso ? " is-active" : ""}`}
-                    onClick={() => patch({ date: iso, slot: null })}
-                  >
-                    <span className="date-cell-dow">{d.toLocaleDateString(dateLocale, { weekday: "short" })}</span>
-                    <span className="date-cell-day">{d.getDate()}</span>
-                    <span className="date-cell-mon">{d.toLocaleDateString(dateLocale, { month: "short" })}</span>
-                  </button>
-                );
-              })}
-          </div>
-        </div>
+    <div className="fr-step">
+      <header className="fr-step-head">
+        <h2 className="display fr-step-title">{t("timeHeading")}</h2>
+      </header>
 
-        <div className="timepicker mt-24">
-          <div className="datepicker-head">
-            <span className="t-12 eyebrow">{t("pickTime")}</span>
-          </div>
-          <div className="time-grid">
-            {!state.date ? (
-              <div className="time-empty">{t("pickDayFirst")}</div>
-            ) : daySlots.length === 0 ? (
-              <div className="time-empty">{t("closedLabel")}</div>
-            ) : (
-              daySlots.map((iso) => (
+      {/* Professional switcher — shows the chosen barber, lets them change. */}
+      <div className="fr-pro-switch">
+        <span className="fr-avatar fr-avatar--sm" aria-hidden="true">
+          {state.barberId ? (barber?.name.charAt(0) ?? "?") : "?"}
+        </span>
+        <span className="fr-pro-switch-name">{barberName}</span>
+        <button type="button" className="fr-link" onClick={() => goto(2)}>
+          {t("changeProfessional")}
+        </button>
+      </div>
+
+      <div className="fr-pick-label eyebrow">{t("pickDay")}</div>
+      <div className="fr-date-strip">
+        {slotsLoading && <div className="fr-loading">…</div>}
+        {!slotsLoading && availableDates.length === 0 && (
+          <div className="fr-empty">{t("closedLabel")}</div>
+        )}
+        {!slotsLoading &&
+          availableDates.map((iso) => {
+            const d = new Date(iso + "T00:00");
+            const active = state.date === iso;
+            return (
+              <button
+                key={iso}
+                type="button"
+                className={`fr-date${active ? " is-active" : ""}`}
+                aria-pressed={active}
+                onClick={() => patch({ date: iso, slot: null })}
+              >
+                <span className="fr-date-dow">{d.toLocaleDateString(dateLocale, { weekday: "short" })}</span>
+                <span className="display fr-date-day">{d.getDate()}</span>
+                <span className="fr-date-mon">{d.toLocaleDateString(dateLocale, { month: "short" })}</span>
+              </button>
+            );
+          })}
+      </div>
+
+      <div className="fr-pick-label eyebrow mt-24">{t("pickTime")}</div>
+      <ul className="fr-time-list">
+        {!state.date ? (
+          <li className="fr-empty">{t("pickDayFirst")}</li>
+        ) : daySlots.length === 0 ? (
+          <li className="fr-empty">{t("closedLabel")}</li>
+        ) : (
+          daySlots.map((iso) => {
+            const active = state.slot === iso;
+            return (
+              <li key={iso}>
                 <button
-                  key={iso}
                   type="button"
-                  className={`time-cell${state.slot === iso ? " is-active" : ""}`}
+                  className={`fr-time${active ? " is-active" : ""}`}
+                  aria-pressed={active}
                   onClick={() => patch({ slot: iso })}
                 >
                   {shopTime(iso, dateLocale)}
                 </button>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="step-actions">
-        <button type="button" className="btn btn--ghost" onClick={() => goto(2)}>{t("back")}</button>
-        <button type="button" className="btn btn--accent btn--lg" disabled={!can[3]} onClick={() => goto(4)}>
-          {t("continue")}
-        </button>
-      </div>
-    </>
+              </li>
+            );
+          })
+        )}
+      </ul>
+    </div>
   );
 
   const step4Body = (
-    <>
-      {mobileBack(3)}
-      {head(t("pane4Eyebrow"), t("pane4Title"))}
-      <div className="form-grid step-scroll">
+    <div className="fr-step">
+      <header className="fr-step-head">
+        <h2 className="display fr-step-title">{t("detailsHeading")}</h2>
+      </header>
+      <div className="fr-form">
         <div className="field">
-          <label className="field-label" htmlFor="f-name">{t("nameLabel")}</label>
+          <label className="field-label" htmlFor="f-name">{baseLabel(t("nameLabel"))} *</label>
           <input
             className="input" type="text" id="f-name" autoComplete="name"
             value={state.name} data-invalid={errors.name ? "true" : undefined}
@@ -498,10 +569,8 @@ export function BookingForm() {
           />
           <span className="field-error">{errors.name ?? ""}</span>
         </div>
-        <div className="field field-wide">
-          {/* Email is now REQUIRED: strip the "(optional)" marker baked into the
-              i18n string and append the required asterisk (messages/ is owned
-              elsewhere, so we adjust the indicator here, not the copy). */}
+        <div className="field">
+          {/* Email is REQUIRED here (strip the i18n "(optional)" marker, add "*"). */}
           <label className="field-label" htmlFor="f-email">{baseLabel(t("emailLabel"))} *</label>
           <input
             className="input" type="email" id="f-email" autoComplete="email" placeholder={t("emailPlaceholder")}
@@ -510,10 +579,8 @@ export function BookingForm() {
           />
           <span className="field-error" />
         </div>
-        <div className="field field-wide">
-          {/* Phone is now OPTIONAL: the i18n string still carries a "*" in some
-              locales, so strip any marker and append the locale's optional word
-              by reusing the email label's "(optional)" suffix verbatim. */}
+        <div className="field">
+          {/* Phone is OPTIONAL: reuse the locale's own "(optional)" suffix. */}
           <label className="field-label" htmlFor="f-phone">{baseLabel(t("phoneLabel"))} {optionalSuffix}</label>
           <input
             className="input" type="tel" id="f-phone" autoComplete="tel" placeholder={t("phonePlaceholder")}
@@ -522,118 +589,148 @@ export function BookingForm() {
           />
           <span className="field-error">{errors.phone ?? ""}</span>
         </div>
-        <div className="field field-wide">
+        <div className="field">
           <label className="field-label" htmlFor="f-notes">{t("notesLabel")}</label>
           <textarea
             className="textarea" id="f-notes" rows={3} placeholder={t("notesPlaceholder")}
             value={state.notes} onChange={(e) => patch({ notes: e.target.value })}
           />
         </div>
+        <p className="fr-fineprint t-14 text-muted">{t("confirmNote")}</p>
+        {submitError ? <p className="field-error">{t("submitError")}</p> : null}
       </div>
-      <div className="step-actions">
-        <button type="button" className="btn btn--ghost" onClick={() => goto(3)}>{t("back")}</button>
-        <button
-          type="button" className="btn btn--accent btn--lg" disabled={!can[4]}
-          onClick={() => { if (validateContact()) goto(5); }}
-        >
-          {t("toConfirm")}
-        </button>
-      </div>
-    </>
+    </div>
   );
 
-  const step5Body = (
-    <>
-      {mobileBack(4)}
-      {head(t("pane5Eyebrow"), t("pane5Title"))}
-      <div className="step-scroll">
-        {confirmRows(false)}
-        <p className="t-14 text-muted mt-16">{t("confirmNote")}</p>
-        {submitError ? <p className="field-error mt-8">{t("submitError")}</p> : null}
-      </div>
-      <div className="step-actions">
-        <button type="button" className="btn btn--ghost" onClick={() => goto(4)} disabled={phase !== "idle"}>{t("editBack")}</button>
-        <button type="button" className="btn btn--accent btn--lg" disabled={phase !== "idle"} onClick={submit}>
-          {t("confirmBtn")}
-        </button>
-      </div>
+  const bodies: Record<number, ReactNode> = {
+    1: step1Body, 2: step2Body, 3: step3Body, 4: step4Body,
+  };
 
-      {/* Smooth submit overlay: spinner → green check, then the pane hands off
-          to the success screen. AnimatePresence fades the whole overlay. */}
-      <AnimatePresence>
-        {phase !== "idle" && (
-          <motion.div
-            key="submit-overlay"
-            className="submit-overlay"
-            aria-live="polite"
-            initial={reduce ? { opacity: 1 } : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
-          >
-            <motion.div
-              className="submit-overlay-inner"
-              initial={reduce ? false : { opacity: 0, y: 8, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
-            >
-              <div className={`submit-mark${phase === "success" ? " is-done" : ""}`} aria-hidden="true">
-                <AnimatePresence mode="wait" initial={false}>
-                  {phase === "submitting" ? (
-                    <motion.span
-                      key="spin"
-                      className="submit-spinner"
-                      initial={reduce ? false : { opacity: 0, scale: 0.6 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  ) : (
-                    <motion.svg
-                      key="check"
-                      width="28" height="28" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                      initial={reduce ? false : { opacity: 0, scale: 0.4 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ type: "spring", stiffness: 360, damping: 18 }}
-                    >
-                      <motion.path
-                        d="M5 12.5l4.5 4.5L19 6.5"
-                        initial={reduce ? false : { pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ duration: 0.35, ease: [0.2, 0, 0, 1], delay: 0.05 }}
-                      />
-                    </motion.svg>
-                  )}
-                </AnimatePresence>
-              </div>
-              <p className="submit-status">
-                {phase === "submitting" ? t("submitting") : t("successTitle")}
-              </p>
-            </motion.div>
-          </motion.div>
+  // -------------------------------------------------------------------------------
+  // SUMMARY CARD (right column on desktop). Business header → selected service →
+  // date/time → total → Doorgaan. The same content drives the mobile bottom bar.
+  // -------------------------------------------------------------------------------
+  const doorgaanLabel = state.step === 4 ? t("confirmBtn") : t("doorgaan");
+  const doorgaanDisabled = !can[state.step] || (state.step === 4 && phase !== "idle");
+
+  const summaryCard = (
+    <aside className="fr-summary" aria-label={t("summaryTitle")}>
+      <div className="fr-summary-scroll">
+        <div className="fr-biz">
+          <span className="display fr-biz-name">{BUSINESS.legalName}</span>
+          <span className="fr-biz-rating">
+            {BUSINESS.rating} <span className="fr-star" aria-hidden="true">★</span>{" "}
+            <span className="text-muted">({BUSINESS.reviewCount})</span>
+          </span>
+          <span className="fr-biz-addr text-muted">{BUSINESS.street}, {BUSINESS.city}</span>
+        </div>
+        <hr className="fr-rule" />
+
+        {service ? (
+          <div className="fr-line">
+            <div className="fr-line-main">
+              <span className="fr-line-name">{service.name}</span>
+              <span className="fr-line-sub text-muted">
+                {t("durationWith", { duration: service.duration_min, who: barberName })}
+              </span>
+            </div>
+            <span className="display fr-line-price">
+              {serviceIsFree ? t("free") : servicePrice}
+            </span>
+          </div>
+        ) : (
+          <p className="fr-empty-note text-muted">{t("summaryEmpty")}</p>
         )}
-      </AnimatePresence>
-    </>
+
+        {state.slot && slotEndIso ? (
+          <div className="fr-when">
+            <span className="fr-when-row">
+              <span className="fr-when-ic" aria-hidden="true"><IconCal /></span>
+              {new Date(state.slot).toLocaleDateString(dateLocale, {
+                weekday: "long", day: "numeric", month: "long",
+              })}
+            </span>
+            <span className="fr-when-row">
+              <span className="fr-when-ic" aria-hidden="true"><IconClock /></span>
+              {t("slotRange", {
+                start: shopTime(state.slot, dateLocale),
+                end: shopTime(slotEndIso, dateLocale),
+                duration: service?.duration_min ?? 0,
+              })}
+            </span>
+          </div>
+        ) : null}
+
+        <hr className="fr-rule" />
+        <div className="fr-total">
+          <span className="fr-total-label">{t("total")}</span>
+          <span className="display fr-total-value">
+            {service ? (serviceIsFree ? t("free") : (servicePrice ?? "—")) : "—"}
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="btn btn--accent btn--lg btn--block fr-doorgaan"
+        disabled={doorgaanDisabled}
+        onClick={doorgaan}
+      >
+        {doorgaanLabel}
+      </button>
+    </aside>
   );
 
-  const step6Body = (
-    <>
+  // Mobile sticky bottom bar: total + Doorgaan, always visible.
+  const mobileBar = (
+    <div className="fr-bottombar">
+      <div className="fr-bottombar-total">
+        <span className="fr-bottombar-label">{t("total")}</span>
+        <span className="display fr-bottombar-value">
+          {service ? (serviceIsFree ? t("free") : (servicePrice ?? "—")) : "—"}
+        </span>
+      </div>
+      <button
+        type="button"
+        className="btn btn--accent btn--lg fr-bottombar-btn"
+        disabled={doorgaanDisabled}
+        onClick={doorgaan}
+      >
+        {doorgaanLabel}
+      </button>
+    </div>
+  );
+
+  // Success screen (terminal). Replaces the whole two-column body.
+  const successScreen = (
+    <div className="fr-success">
       <div className="success-mark" aria-hidden="true">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="12" cy="12" r="10" />
           <path d="M8 12.5l3 3 5-6" />
         </svg>
       </div>
-      <h2 className="display step-pane-title mt-24">{t("successTitle")}</h2>
+      <h2 className="display fr-success-title">{t("successTitle")}</h2>
       <p className="lead mt-16">{t("successBody")}</p>
-      <div className="mt-32">{confirmRows(true)}</div>
+      <dl className="fr-success-list">
+        <div><dt>{t("confService")}</dt><dd>{service?.name ?? "—"}</dd></div>
+        <div><dt>{t("confBarber")}</dt><dd>{barberName}</dd></div>
+        <div>
+          <dt>{t("confWhen")}</dt>
+          <dd>
+            {state.slot
+              ? `${new Date(state.slot).toLocaleDateString(dateLocale, { day: "numeric", month: "long" })} · ${shopTime(state.slot, dateLocale)}`
+              : "—"}
+          </dd>
+        </div>
+        <div><dt>{t("refLabel")}</dt><dd>{state.ref ?? "—"}</dd></div>
+      </dl>
       {state.manageUrl ? (
         <p className="t-14 mt-16">
           <a href={state.manageUrl} target="_blank" rel="noopener"><strong>{t("confWhen")} ↗</strong></a>
         </p>
       ) : null}
-      <div className="step-actions">
+      <div className="fr-success-actions">
         <Link className="btn btn--ghost" href="/">{t("toHome")}</Link>
         <button
           type="button" className="btn btn--accent"
@@ -642,15 +739,10 @@ export function BookingForm() {
           {t("another")}
         </button>
       </div>
-    </>
+    </div>
   );
 
-  const bodies: Record<number, ReactNode> = {
-    1: step1Body, 2: step2Body, 3: step3Body, 4: step4Body, 5: step5Body, 6: step6Body,
-  };
-
-  // Mobile transition: fade-out current → fade-in next, with a small vertical
-  // slide. Respect reduced-motion (opacity-only, instant feel).
+  // Mobile step transition: fade + small vertical slide; reduced-motion → opacity only.
   const mobileVariants = reduce
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : {
@@ -659,37 +751,88 @@ export function BookingForm() {
         exit: { opacity: 0, y: -12 },
       };
 
-  return (
-    <div className="booking-grid">
-      <aside className="booking-side">
-        <ol className="steps">
-          {stepDefs.map((s) => (
-            <li
-              key={s.n}
-              className={`step${state.step === s.n ? " is-active" : ""}${state.step > s.n ? " is-complete" : ""}`}
-            >
-              <span className="step-num">{String(s.n).padStart(2, "0")}</span>
-              <span className="step-label">{s.label}</span>
-              {s.pick !== null ? <span className="step-pick t-14 text-muted">{s.pick}</span> : null}
-            </li>
-          ))}
-        </ol>
-        <div className="side-help">
-          <p className="t-14 text-muted">{t("sideHelp")}</p>
-          <div className="side-help-row mt-16">
-            <a href={BUSINESS.phoneHref} className="t-14"><strong>{BUSINESS.phoneDisplay}</strong></a>
-            <a href={BUSINESS.instagram} target="_blank" rel="noopener" className="t-14">{t("sideIg")}</a>
-          </div>
-        </div>
-      </aside>
+  // -------------------------------------------------------------------------------
+  // SUBMIT OVERLAY — spinner → green-check morph (covers the screen during POST).
+  // -------------------------------------------------------------------------------
+  const submitOverlay = (
+    <AnimatePresence>
+      {phase !== "idle" && (
+        <motion.div
+          key="submit-overlay"
+          className="submit-overlay"
+          aria-live="polite"
+          initial={reduce ? { opacity: 1 } : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
+        >
+          <motion.div
+            className="submit-overlay-inner"
+            initial={reduce ? false : { opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
+          >
+            <div className={`submit-mark${phase === "success" ? " is-done" : ""}`} aria-hidden="true">
+              <AnimatePresence mode="wait" initial={false}>
+                {phase === "submitting" ? (
+                  <motion.span
+                    key="spin"
+                    className="submit-spinner"
+                    initial={reduce ? false : { opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                ) : (
+                  <motion.svg
+                    key="check"
+                    width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    initial={reduce ? false : { opacity: 0, scale: 0.4 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 360, damping: 18 }}
+                  >
+                    <motion.path
+                      d="M5 12.5l4.5 4.5L19 6.5"
+                      initial={reduce ? false : { pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.35, ease: [0.2, 0, 0, 1], delay: 0.05 }}
+                    />
+                  </motion.svg>
+                )}
+              </AnimatePresence>
+            </div>
+            <p className="submit-status">
+              {phase === "submitting" ? t("submitting") : t("successTitle")}
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
-      <div className="booking-main">
-        {isMobile ? (
-          // MOBILE: one step at a time, swapped with a fade/slide transition.
+  // -------------------------------------------------------------------------------
+  // RENDER
+  // -------------------------------------------------------------------------------
+  if (state.step === 5) {
+    return (
+      <div className="fr-shell fr-shell--done">
+        {successScreen}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fr-shell">
+      {TopBar}
+
+      {isMobile ? (
+        // MOBILE: one step at a time (left content), sticky bottom bar for Total + action.
+        <div className="fr-mobile">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.section
+            <motion.div
               key={state.step}
-              className={`step-pane step-pane--mobile${state.step === 6 ? " step-success" : ""}`}
+              className="fr-mobile-step"
               variants={mobileVariants}
               initial="initial"
               animate="animate"
@@ -697,20 +840,19 @@ export function BookingForm() {
               transition={{ duration: reduce ? 0.12 : 0.26, ease: [0.2, 0, 0, 1] }}
             >
               {bodies[state.step]}
-            </motion.section>
+            </motion.div>
           </AnimatePresence>
-        ) : (
-          // DESKTOP: keep the side-stepper layout — all panes mounted, CSS-hidden.
-          <>
-            <section className="step-pane" hidden={state.step !== 1}>{step1Body}</section>
-            <section className="step-pane" hidden={state.step !== 2}>{step2Body}</section>
-            <section className="step-pane" hidden={state.step !== 3}>{step3Body}</section>
-            <section className="step-pane" hidden={state.step !== 4}>{step4Body}</section>
-            <section className="step-pane" hidden={state.step !== 5}>{step5Body}</section>
-            <section className="step-pane step-success" hidden={state.step !== 6}>{step6Body}</section>
-          </>
-        )}
-      </div>
+          {mobileBar}
+        </div>
+      ) : (
+        // DESKTOP: two columns — left scrolls, right summary is sticky.
+        <div className="fr-body">
+          <div className="fr-left">{bodies[state.step]}</div>
+          {summaryCard}
+        </div>
+      )}
+
+      {submitOverlay}
     </div>
   );
 }
