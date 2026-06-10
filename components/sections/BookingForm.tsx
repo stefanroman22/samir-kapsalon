@@ -626,46 +626,77 @@ export function BookingForm() {
         </div>
         <hr className="fr-rule" />
 
-        {service ? (
-          <div className="fr-line">
-            <div className="fr-line-main">
-              <span className="fr-line-name">{service.name}</span>
-              <span className="fr-line-sub text-muted">
-                {t("durationWith", { duration: service.duration_min, who: barberName })}
-              </span>
-            </div>
-            <span className="display fr-line-price">
-              {serviceIsFree ? t("free") : servicePrice}
-            </span>
-          </div>
-        ) : (
-          <p className="fr-empty-note text-muted">{t("summaryEmpty")}</p>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={service ? service.id + barberName : "empty"}
+            initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: reduce ? 0 : -6 }}
+            transition={{ duration: reduce ? 0.12 : 0.22, ease: [0.2, 0, 0, 1] }}
+          >
+            {service ? (
+              <div className="fr-line">
+                <div className="fr-line-main">
+                  <span className="fr-line-name">{service.name}</span>
+                  <span className="fr-line-sub text-muted">
+                    {t("durationWith", { duration: service.duration_min, who: barberName })}
+                  </span>
+                </div>
+                <span className="display fr-line-price">
+                  {serviceIsFree ? t("free") : servicePrice}
+                </span>
+              </div>
+            ) : (
+              <p className="fr-empty-note text-muted">{t("summaryEmpty")}</p>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
-        {state.slot && slotEndIso ? (
-          <div className="fr-when">
-            <span className="fr-when-row">
-              <span className="fr-when-ic" aria-hidden="true"><IconCal /></span>
-              {new Date(state.slot).toLocaleDateString(dateLocale, {
-                weekday: "long", day: "numeric", month: "long",
-              })}
-            </span>
-            <span className="fr-when-row">
-              <span className="fr-when-ic" aria-hidden="true"><IconClock /></span>
-              {t("slotRange", {
-                start: shopTime(state.slot, dateLocale),
-                end: shopTime(slotEndIso, dateLocale),
-                duration: service?.duration_min ?? 0,
-              })}
-            </span>
-          </div>
-        ) : null}
+        <AnimatePresence initial={false}>
+          {state.slot && slotEndIso ? (
+            <motion.div
+              key="when"
+              className="fr-when"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: reduce ? 0.12 : 0.25, ease: [0.2, 0, 0, 1] }}
+              style={{ overflow: "hidden" }}
+            >
+              <span className="fr-when-row">
+                <span className="fr-when-ic" aria-hidden="true"><IconCal /></span>
+                {new Date(state.slot).toLocaleDateString(dateLocale, {
+                  weekday: "long", day: "numeric", month: "long",
+                })}
+              </span>
+              <span className="fr-when-row">
+                <span className="fr-when-ic" aria-hidden="true"><IconClock /></span>
+                {t("slotRange", {
+                  start: shopTime(state.slot, dateLocale),
+                  end: shopTime(slotEndIso, dateLocale),
+                  duration: service?.duration_min ?? 0,
+                })}
+              </span>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
         <hr className="fr-rule" />
         <div className="fr-total">
           <span className="fr-total-label">{t("total")}</span>
           <span className="display fr-total-value">
-            {service ? (serviceIsFree ? t("free") : (servicePrice ?? "—")) : "—"}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={service ? (serviceIsFree ? "free" : String(servicePrice)) : "none"}
+                initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: reduce ? 0 : -6 }}
+                transition={{ duration: reduce ? 0.1 : 0.2, ease: [0.2, 0, 0, 1] }}
+                style={{ display: "inline-block" }}
+              >
+                {service ? (serviceIsFree ? t("free") : (servicePrice ?? "—")) : "—"}
+              </motion.span>
+            </AnimatePresence>
           </span>
         </div>
       </div>
@@ -847,7 +878,20 @@ export function BookingForm() {
       ) : (
         // DESKTOP: two columns — left scrolls, right summary is sticky.
         <div className="fr-body">
-          <div className="fr-left">{bodies[state.step]}</div>
+          <div className="fr-left">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={state.step}
+                variants={mobileVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: reduce ? 0.12 : 0.26, ease: [0.2, 0, 0, 1] }}
+              >
+                {bodies[state.step]}
+              </motion.div>
+            </AnimatePresence>
+          </div>
           {summaryCard}
         </div>
       )}
