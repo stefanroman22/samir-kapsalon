@@ -617,7 +617,7 @@ export function BookingForm() {
     <aside className="fr-summary" aria-label={t("summaryTitle")}>
       <div className="fr-summary-scroll">
         <div className="fr-biz">
-          <span className="display fr-biz-name">{BUSINESS.legalName}</span>
+          <span className="display fr-biz-name">{BUSINESS.wordmark}</span>
           <span className="fr-biz-rating">
             {BUSINESS.rating} <span className="fr-star" aria-hidden="true">★</span>{" "}
             <span className="text-muted">({BUSINESS.reviewCount})</span>
