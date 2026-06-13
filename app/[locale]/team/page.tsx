@@ -10,7 +10,16 @@ import { BOOK_HREF, TEAM } from "@/lib/site";
 import { resolveSite } from "@/lib/cms-site";
 
 type Props = { params: Promise<{ locale: string }> };
-type Member = { role: string; bio: string; bookCta: string; portraitAlt: string };
+type Member = {
+  role: string;
+  bio: string;
+  bookCta: string;
+  portraitAlt: string;
+  // CMS-driven (team_members repeater); fall back to the static TEAM constant.
+  name?: string;
+  portrait?: string;
+  tags?: string[];
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -51,11 +60,16 @@ export default async function TeamPage({ params }: Props) {
           <div className="team-grid">
             {TEAM.map((person, i) => {
               const m = members[i];
+              // name/portrait/tags are CMS-editable (team_members); fall back to the
+              // static TEAM constant so the card never breaks if the CMS is absent.
+              const name = m.name ?? person.name;
+              const portrait = m.portrait ?? person.portrait;
+              const tags = m.tags ?? person.tags;
               return (
                 <article className="team-card reveal" key={person.barberKey}>
                   <div className="editorial team-portrait" data-placeholder="true">
                     <Image
-                      src={person.portrait}
+                      src={portrait}
                       alt={m.portraitAlt}
                       fill
                       sizes="(max-width: 1024px) 100vw, 50vw"
@@ -66,10 +80,10 @@ export default async function TeamPage({ params }: Props) {
                     <span className="team-index display">{String(i + 1).padStart(2, "0")}</span>
                     <span className="t-12 eyebrow">{m.role}</span>
                   </div>
-                  <h2 className="display team-name">{person.name}</h2>
+                  <h2 className="display team-name">{name}</h2>
                   <p className="t-16 text-muted team-bio">{m.bio}</p>
                   <ul className="team-tags">
-                    {person.tags.map((tag) => (
+                    {tags.map((tag) => (
                       <li key={tag}>{tag}</li>
                     ))}
                   </ul>
