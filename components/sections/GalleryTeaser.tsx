@@ -1,11 +1,12 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { GALLERY_TEASER_IMAGES } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 export async function GalleryTeaser() {
   const t = await getTranslations("galleryTeaser");
   const alts = t.raw("alts") as string[];
+  const { galleryTeaserImages } = resolveSite(await getMessages());
 
   return (
     <section className="section">
@@ -25,7 +26,7 @@ export async function GalleryTeaser() {
         </div>
 
         <div className="gallery-teaser mt-48">
-          {GALLERY_TEASER_IMAGES.map((src, i) => (
+          {galleryTeaserImages.map((src, i) => (
             <Link
               key={src + i}
               href="/galerij"

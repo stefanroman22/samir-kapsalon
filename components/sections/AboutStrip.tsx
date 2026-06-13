@@ -1,9 +1,10 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
-import { ABOUT_IMAGES } from "@/lib/site";
+import { getTranslations, getMessages } from "next-intl/server";
+import { resolveSite } from "@/lib/cms-site";
 
 export async function AboutStrip() {
   const t = await getTranslations("about");
+  const { aboutImages } = resolveSite(await getMessages());
 
   return (
     <section className="section about-strip">
@@ -38,7 +39,7 @@ export async function AboutStrip() {
         <div className="about-images reveal">
           <div className="editorial ratio-45" data-placeholder="true">
             <Image
-              src={ABOUT_IMAGES[0]}
+              src={aboutImages[0]}
               alt={t("img1Alt")}
               fill
               sizes="(max-width: 1024px) 60vw, 30vw"
@@ -47,7 +48,7 @@ export async function AboutStrip() {
           </div>
           <div className="editorial ratio-11 about-img-2" data-placeholder="true">
             <Image
-              src={ABOUT_IMAGES[1]}
+              src={aboutImages[1]}
               alt={t("img2Alt")}
               fill
               sizes="(max-width: 1024px) 30vw, 15vw"

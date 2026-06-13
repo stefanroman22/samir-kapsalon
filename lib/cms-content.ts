@@ -30,6 +30,9 @@ const ENTRY_NS: Record<string, string> = {
   contact_content: "contact",
   booking_page_header: "booking",
   footer: "footer",
+  // careers copy lives in the `team` namespace (careersEyebrow/Title/Body keys
+  // match 1:1, so the CMS entries deep-merge straight over the static messages).
+  team_careers: "team",
 };
 
 /** Build a partial next-intl message tree from the CMS `content` map. */
@@ -57,6 +60,33 @@ function cmsToMessages(content: Json): Json {
   if (team) (ns("team") as Json).members = team;
   const reviews = items("reviews_items");
   if (reviews) (ns("reviews") as Json).items = reviews;
+
+  // ── Non-message site data (images, hours, contact, brand) ──────────────────
+  // These services don't map to a text namespace; they back the static constants
+  // in `lib/site.ts`. We surface them under a `site` namespace that `resolveSite`
+  // (lib/cms-site.ts) reads, falling back to the static constants when absent.
+  const site: Json = {};
+  const brand = content.general_brand_name as Json | undefined;
+  if (typeof brand?.title === "string" && brand.title.trim()) site.brandName = brand.title;
+  const contact = (content.contact_info as Json | undefined)?.entries;
+  if (contact && typeof contact === "object") site.contact = contact;
+  const hours = (content.opening_hours as Json | undefined)?.items;
+  if (Array.isArray(hours) && hours.length) site.hours = hours;
+  const heroUrl = (content.hero_image as Json | undefined)?.url;
+  if (typeof heroUrl === "string" && heroUrl) site.heroImage = heroUrl;
+  const gallery = (key: string): string[] | null => {
+    const arr = (content[key] as Json | undefined)?.items;
+    return Array.isArray(arr) && arr.length ? (arr as string[]) : null;
+  };
+  const ab = gallery("about_images");
+  if (ab) site.aboutImages = ab;
+  const gi = gallery("gallery_images");
+  if (gi) site.galleryImages = gi;
+  const gt = gallery("gallery_teaser_images");
+  if (gt) site.galleryTeaserImages = gt;
+  const ig = gallery("instagram_images");
+  if (ig) site.instagramImages = ig;
+  if (Object.keys(site).length) m.site = site;
 
   // service_menu is flat ({group, name, desc, meta, price}); the site renders grouped.
   const menu = items("service_menu");

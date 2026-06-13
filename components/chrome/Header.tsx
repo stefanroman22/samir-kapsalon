@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useMessages } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { BUSINESS, NAV, BOOK_HREF } from "@/lib/site";
+import { NAV, BOOK_HREF } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 export function Header() {
   const t = useTranslations("nav");
+  const { contact } = resolveSite(useMessages());
   const pathname = usePathname();
   const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
@@ -112,13 +114,11 @@ export function Header() {
           <LanguageSwitcher />
         </div>
         <div className="mobile-menu-footer">
-          <a href={BUSINESS.phoneHref}>{BUSINESS.phoneDisplay}</a>
-          <a href={BUSINESS.instagram} target="_blank" rel="noopener">
-            {BUSINESS.instagramHandle}
+          <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
+          <a href={contact.instagram} target="_blank" rel="noopener">
+            {contact.instagramHandle}
           </a>
-          <span>
-            {BUSINESS.street}, {BUSINESS.city}
-          </span>
+          <span>{contact.addressLines.join(", ")}</span>
         </div>
       </div>
     </>

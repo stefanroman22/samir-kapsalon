@@ -1,16 +1,18 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { BOOK_HREF, HERO_IMAGE } from "@/lib/site";
+import { BOOK_HREF } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 export async function Hero() {
   const t = await getTranslations("hero");
+  const site = resolveSite(await getMessages());
 
   return (
     <section className="hero" aria-label="Hero">
       <div className="hero-media editorial" data-placeholder="true">
         <Image
-          src={HERO_IMAGE}
+          src={site.heroImage}
           alt={t("imageAlt")}
           fill
           priority

@@ -1,12 +1,14 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { HoursTable } from "./HoursTable";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { BUSINESS, NAV, BOOK_HREF } from "@/lib/site";
+import { NAV, BOOK_HREF } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 export async function Footer() {
   const t = await getTranslations("footer");
   const nav = await getTranslations("nav");
+  const { contact } = resolveSite(await getMessages());
 
   return (
     <footer className="site-footer">
@@ -24,16 +26,15 @@ export async function Footer() {
           <div className="footer-col">
             <h4>{t("visit")}</h4>
             <ul>
-              <li>{BUSINESS.street}</li>
+              {contact.addressLines.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
               <li>
-                {BUSINESS.postcode} {BUSINESS.city}
+                <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
               </li>
               <li>
-                <a href={BUSINESS.phoneHref}>{BUSINESS.phoneDisplay}</a>
-              </li>
-              <li>
-                <a href={BUSINESS.instagram} target="_blank" rel="noopener">
-                  {BUSINESS.instagramHandle}
+                <a href={contact.instagram} target="_blank" rel="noopener">
+                  {contact.instagramHandle}
                 </a>
               </li>
             </ul>

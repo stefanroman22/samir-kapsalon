@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { BookingStrip } from "@/components/sections/BookingStrip";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
-import { BUSINESS, BOOK_HREF, TEAM } from "@/lib/site";
+import { BOOK_HREF, TEAM } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 type Props = { params: Promise<{ locale: string }> };
 type Member = { role: string; bio: string; bookCta: string; portraitAlt: string };
@@ -33,6 +34,7 @@ export default async function TeamPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("team");
   const members = t.raw("members") as Member[];
+  const { contact } = resolveSite(await getMessages());
 
   return (
     <>
@@ -78,7 +80,7 @@ export default async function TeamPage({ params }: Props) {
                     >
                       {m.bookCta}
                     </Link>
-                    <a href={BUSINESS.instagram} target="_blank" rel="noopener" className="t-14">
+                    <a href={contact.instagram} target="_blank" rel="noopener" className="t-14">
                       {t("igLink")}
                     </a>
                   </div>
@@ -98,7 +100,7 @@ export default async function TeamPage({ params }: Props) {
             <p className="t-16 mt-16 text-muted" style={{ maxWidth: "56ch" }}>
               {t("careersBody")}
             </p>
-            <a href={BUSINESS.instagram} target="_blank" rel="noopener" className="btn btn--ghost mt-24">
+            <a href={contact.instagram} target="_blank" rel="noopener" className="btn btn--ghost mt-24">
               {t("careersCta")}
             </a>
           </div>

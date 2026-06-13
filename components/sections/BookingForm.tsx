@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useMessages } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Link } from "@/i18n/navigation";
 import { BUSINESS } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 import {
   getServices,
   getResources,
@@ -145,6 +146,7 @@ const IconClock = () => (
 
 export function BookingForm() {
   const t = useTranslations("booking");
+  const { brandName, contact } = resolveSite(useMessages());
   const dateLocale = t("dateLocale");
   const reduce = useReducedMotion();
   const isMobile = useIsMobile();
@@ -617,12 +619,12 @@ export function BookingForm() {
     <aside className="fr-summary" aria-label={t("summaryTitle")}>
       <div className="fr-summary-scroll">
         <div className="fr-biz">
-          <span className="display fr-biz-name">{BUSINESS.wordmark}</span>
+          <span className="display fr-biz-name">{brandName}</span>
           <span className="fr-biz-rating">
             {BUSINESS.rating} <span className="fr-star" aria-hidden="true">★</span>{" "}
             <span className="text-muted">({BUSINESS.reviewCountDisplay})</span>
           </span>
-          <span className="fr-biz-addr text-muted">{BUSINESS.street}, {BUSINESS.city}</span>
+          <span className="fr-biz-addr text-muted">{contact.addressLines.join(", ")}</span>
         </div>
         <hr className="fr-rule" />
 

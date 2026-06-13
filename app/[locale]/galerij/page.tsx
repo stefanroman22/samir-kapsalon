@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { GalleryGrid } from "@/components/sections/GalleryGrid";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
-import { GALLERY_IMAGES } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -28,6 +28,7 @@ export default async function GalerijPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("galerij");
+  const { galleryImages } = resolveSite(await getMessages());
 
   return (
     <>
@@ -48,7 +49,7 @@ export default async function GalerijPage({ params }: Props) {
       <section className="section">
         <div className="container">
           <GalleryGrid
-            images={GALLERY_IMAGES}
+            images={galleryImages}
             labels={{
               close: t("lightboxClose"),
               prev: t("lightboxPrev"),

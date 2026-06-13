@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { HoursTable } from "@/components/chrome/HoursTable";
 import { MapCard } from "@/components/sections/MapCard";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
-import { BUSINESS, BOOK_HREF } from "@/lib/site";
+import { BOOK_HREF } from "@/lib/site";
+import { resolveSite } from "@/lib/cms-site";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -30,6 +31,7 @@ export default async function ContactPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("contact");
+  const { contact } = resolveSite(await getMessages());
 
   return (
     <>
@@ -46,11 +48,14 @@ export default async function ContactPage({ params }: Props) {
             <div className="contact-block mt-32">
               <span className="eyebrow">{t("addressLabel")}</span>
               <p className="contact-line">
-                {BUSINESS.street}
-                <br />
-                {BUSINESS.postcode} {BUSINESS.city}
+                {contact.addressLines.map((line, i) => (
+                  <span key={line}>
+                    {i > 0 && <br />}
+                    {line}
+                  </span>
+                ))}
               </p>
-              <a className="t-14 contact-act" href={BUSINESS.routeUrl} target="_blank" rel="noopener">
+              <a className="t-14 contact-act" href={contact.routeUrl} target="_blank" rel="noopener">
                 {t("routeCta")}
               </a>
             </div>
@@ -58,7 +63,7 @@ export default async function ContactPage({ params }: Props) {
             <div className="contact-block">
               <span className="eyebrow">{t("callLabel")}</span>
               <p className="contact-line">
-                <a href={BUSINESS.phoneHref}>{BUSINESS.phoneDisplay}</a>
+                <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
               </p>
               <span className="t-14 text-muted">{t("callNote")}</span>
             </div>
@@ -66,7 +71,7 @@ export default async function ContactPage({ params }: Props) {
             <div className="contact-block">
               <span className="eyebrow">{t("followLabel")}</span>
               <p className="contact-line">
-                <a href={BUSINESS.instagram} target="_blank" rel="noopener">
+                <a href={contact.instagram} target="_blank" rel="noopener">
                   {t("igLink")}
                 </a>
               </p>
