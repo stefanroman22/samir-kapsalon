@@ -123,18 +123,45 @@ function deepMerge<T>(base: T, over: unknown): T {
   return over as T;
 }
 
-/** Fetch + merge CMS content over the local messages for `locale`. Never throws. */
+/** Fetch + merge CMS content over the local messages for `locale`. Never throws.
+ *
+ * SERVER-ONLY: this module is imported only by i18n/request.ts. The preview token
+ * is read from the server-only env `CMS_PREVIEW_TOKEN` (NEVER NEXT_PUBLIC_ — it is a
+ * credential and must not be inlined into the client bundle). When the token is
+ * present (cms-preview deployment + localhost via .env.local) we fetch the DRAFT so
+ * SAVED-but-unpublished edits show; production has no token and reads PUBLISHED.
+ * Fallback chain never throws: draft 401/!ok → published → local seed. */
 export async function withCmsContent(locale: string, local: Json): Promise<Json> {
   const base = (process.env.NEXT_PUBLIC_CMS_ENDPOINT || "").replace(/\/draft\/?$/, "");
   if (!base) return local;
-  try {
-    const res = await fetch(`${base}/${locale}`, { next: { revalidate: 60 } });
-    if (!res.ok) return local;
-    const payload = (await res.json()) as { content?: Json };
-    if (!payload?.content || typeof payload.content !== "object") return local;
-    const cmsMessages = cmsToMessages(payload.content);
-    return deepMerge(local, cmsMessages);
-  } catch {
-    return local;
+  const token = process.env.CMS_PREVIEW_TOKEN;
+
+  async function fetchContent(): Promise<Json | null> {
+    if (token) {
+      try {
+        const res = await fetch(`${base}/${locale}/draft`, {
+          headers: { "X-CMS-Preview-Token": token },
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const p = (await res.json()) as { content?: Json };
+          if (p?.content && typeof p.content === "object") return p.content;
+        }
+      } catch {
+        /* fall through to published */
+      }
+    }
+    try {
+      const res = await fetch(`${base}/${locale}`, { next: { revalidate: 60 } });
+      if (!res.ok) return null;
+      const p = (await res.json()) as { content?: Json };
+      if (p?.content && typeof p.content === "object") return p.content;
+    } catch {
+      /* fall through to local */
+    }
+    return null;
   }
+
+  const content = await fetchContent();
+  return content ? deepMerge(local, cmsToMessages(content)) : local;
 }
