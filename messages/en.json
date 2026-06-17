@@ -6,6 +6,7 @@
   },
   "loader": {
     "loading": "Just setting up the chair…",
+    "routeLoading": "Cutting in progress…",
     "ready": "Welcome to Samir."
   },
   "nav": {
@@ -284,6 +285,8 @@
     "pane3Title": "When works?",
     "pickDay": "Pick a day",
     "pickTime": "Pick a time",
+    "weekPrev": "Previous week",
+    "weekNext": "Next week",
     "pickDayFirst": "Pick a day first.",
     "closedLabel": "Closed",
     "pane4Eyebrow": "STEP 04 / 04",
@@ -315,7 +318,7 @@
     "submitError": "Something went wrong. Try again or call us.",
     "successTitle": "See you in the chair.",
     "successBody": "Your booking is in. Keep this confirmation handy — or drop it in your calendar.",
-    "refLabel": "Reference",
+    "manageBooking": "Manage your booking",
     "toHome": "← Back to home",
     "another": "Make another",
     "dateLocale": "en-GB",

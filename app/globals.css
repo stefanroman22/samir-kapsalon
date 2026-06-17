@@ -1365,7 +1365,7 @@ html.js .reveal.is-visible {
   grid-area: toggle;
   position: absolute;
   right: 18px; top: 50%; transform: translateY(-50%);
-  display: inline-flex; align-items: center; justify-content: center;
+  display: grid; place-items: center;
   width: 30px; height: 30px;
   border-radius: 50%;
   border: 1px solid var(--border);
@@ -1380,6 +1380,19 @@ html.js .reveal.is-visible {
   border-color: var(--accent);
   color: var(--accent-foreground);
 }
+
+/* Select ⇆ Selected icon cross-fade (service toggle + barber pill). Both icons are
+   always rendered, stacked in one grid cell; we fade/scale between them so the colour
+   change and the checkmark animate in smoothly instead of popping. */
+.fr-ic {
+  grid-area: 1 / 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s var(--ease-standard), transform 0.2s var(--ease-standard);
+}
+.fr-ic--check { opacity: 0; transform: scale(0.5); }
+.is-selected .fr-ic--check, .is-on .fr-ic--check { opacity: 1; transform: scale(1); }
+.is-selected .fr-ic--plus, .is-on .fr-ic--plus { opacity: 0; transform: scale(0.5); }
+@media (prefers-reduced-motion: reduce) { .fr-ic { transition: none; } }
 
 /* ---------- Step 2: professional cards ---------- */
 .fr-pro-card {
@@ -1429,6 +1442,13 @@ html.js .reveal.is-visible {
 }
 .fr-pill svg { width: 14px; height: 14px; }
 .fr-pill.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-foreground); }
+.fr-pill-icon { display: grid; place-items: center; }
+@media (max-width: 520px) {
+  /* phones: the whole card is the tap target, so the pill is an icon-only badge — the
+     text label is hidden and the cross-fading check/plus does the talking. */
+  .fr-pill { padding: 9px; }
+  .fr-pill-label { display: none; }
+}
 
 /* ---------- Step 3: professional switcher + dates + times ---------- */
 .fr-pro-switch {
@@ -1444,40 +1464,71 @@ html.js .reveal.is-visible {
   font-size: 13px; font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--accent);
+  cursor: pointer;
   transition: color var(--motion-base) var(--ease-standard);
 }
 .fr-link:hover { color: var(--accent-hover); }
 .fr-pick-label { display: block; margin-bottom: 12px; }
 
-.fr-date-strip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  scrollbar-width: thin;
-  scroll-snap-type: x proximity;
+/* "Choose a day" header: label left, week ‹ / › arrows right, same baseline. */
+.fr-pick-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.fr-pick-head .fr-pick-label { margin-bottom: 0; }
+.fr-week-nav { display: inline-flex; gap: 8px; flex: 0 0 auto; }
+.fr-week-arrow {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              background var(--motion-base) var(--ease-standard),
+              opacity var(--motion-base) var(--ease-standard);
 }
-.fr-date-strip::-webkit-scrollbar { height: 6px; }
-.fr-date-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+.fr-week-arrow:hover:not(:disabled) { border-color: var(--foreground); }
+.fr-week-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+.fr-week-arrow svg { width: 16px; height: 16px; }
+.fr-week-arrow--next svg { transform: scaleX(-1); }
+
+/* The strip always shows exactly 7 equal-width day cells (no scroll) — the arrows page
+   between weeks. Equal grid columns keep all 7 visible on every width. The wrap clips the
+   week-to-week slide so the outgoing/incoming strips don't spill sideways. */
+.fr-date-strip-wrap { position: relative; overflow: hidden; }
+.fr-date-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
 .fr-date {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  min-width: 64px;
-  padding: 12px 10px;
+  min-width: 0;
+  padding: 12px 4px;
   border: 1px solid var(--border);
   background: var(--background);
   border-radius: var(--radius-md);
+  cursor: pointer;
   transition: border-color var(--motion-base) var(--ease-standard),
               background var(--motion-base) var(--ease-standard),
-              color var(--motion-base) var(--ease-standard);
+              color var(--motion-base) var(--ease-standard),
+              opacity var(--motion-base) var(--ease-standard);
 }
-.fr-date:hover { border-color: var(--foreground); }
+.fr-date:hover:not(:disabled) { border-color: var(--foreground); }
 .fr-date.is-active { border-color: var(--accent); background: var(--accent); color: var(--accent-foreground); }
-.fr-date-dow { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-foreground); }
+.fr-date:disabled { opacity: 0.4; cursor: not-allowed; } /* sold-out or loading */
+.fr-date-dow { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-foreground); }
 .fr-date.is-active .fr-date-dow, .fr-date.is-active .fr-date-mon { color: oklch(96% 0.005 80 / 0.85); }
 .fr-date-day { font-size: 22px; line-height: 1; }
-.fr-date-mon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-foreground); }
+.fr-date-mon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-foreground); }
+@media (max-width: 420px) {
+  .fr-date-strip { gap: 4px; }
+  .fr-date { padding: 10px 2px; }
+  .fr-date-day { font-size: 18px; }
+  .fr-date-dow, .fr-date-mon { font-size: 9px; letter-spacing: 0.04em; }
+}
+@media (max-width: 340px) {
+  .fr-date-mon { display: none; } /* tiniest phones: drop the month so 7 cells stay legible */
+}
 
 .fr-time {
   width: 100%;
@@ -1594,29 +1645,62 @@ html.js .reveal.is-visible {
 .fr-bottombar-btn { flex: 0 0 auto; }
 
 /* ---------- Success screen ---------- */
-.fr-shell--done { padding: 36px 24px 40px; align-items: center; justify-content: center; }
-@media (min-width: 768px) { .fr-shell--done { padding: 56px 48px; } }
-.fr-success { display: flex; flex-direction: column; align-items: flex-start; max-width: 640px; }
-.fr-success-title { font-size: clamp(32px, 5vw, 56px); line-height: 0.95; letter-spacing: -0.01em; text-transform: uppercase; margin-top: 24px; }
-.fr-success-list { margin: 32px 0 0; width: 100%; border-top: 1px solid var(--border); }
+/* The confirmation must fit the shell on EVERY screen with NO scrolling (page or inner).
+   The shell already fills the viewport below the header; we drop its min-height floor so
+   it never exceeds the viewport, then keep the content compact and scale it down on short
+   viewports (max-height queries) so everything stays visible, centred — no scroll, no clip. */
+.fr-shell--done {
+  min-height: 0;
+  padding: clamp(16px, 3.5vmin, 48px) clamp(20px, 5vw, 48px);
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Confirmation sits directly on the page — no card chrome. */
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+}
+.fr-success { display: flex; flex-direction: column; align-items: flex-start; max-width: 640px; width: 100%; }
+.fr-success-title { font-size: clamp(26px, 4.5vw, 44px); line-height: 0.98; letter-spacing: -0.01em; text-transform: uppercase; margin: 0; }
+.fr-success-body { margin: 10px 0 0; }
+.fr-success-list { margin: 20px 0 0; width: 100%; border-top: 1px solid var(--border); }
 .fr-success-list > div {
   display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 16px;
-  padding: 14px 0;
+  grid-template-columns: 104px 1fr;   /* compact 2-col keeps each row to one line (more vertical room) */
+  gap: 12px;
+  padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
+@media (min-width: 480px) { .fr-success-list > div { grid-template-columns: 160px 1fr; gap: 16px; } }
 .fr-success-list dt { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-foreground); margin: 0; padding-top: 2px; }
-.fr-success-list dd { margin: 0; font-size: 16px; }
-.fr-success-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.fr-success-list dd { margin: 0; font-size: 16px; overflow-wrap: anywhere; }  /* long reference id wraps instead of overflowing */
+.fr-success-manage { margin: 16px 0 0; }
+.fr-success-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
 
-.success-mark {
-  display: inline-flex;
-  width: 64px; height: 64px;
-  align-items: center; justify-content: center;
-  background: oklch(50% 0.09 45 / 0.10);
-  color: var(--accent);
-  border-radius: 50%;
+/* Short viewports: shrink type + spacing so the whole card still fits without scrolling. */
+@media (max-height: 740px) {
+  .fr-success-title { font-size: clamp(22px, 4vw, 32px); }
+  .fr-success-body { font-size: 15px; margin-top: 8px; }
+  .fr-success-list { margin-top: 14px; }
+  .fr-success-list > div { padding: 8px 0; }
+  .fr-success-manage { margin-top: 12px; }
+  .fr-success-actions { margin-top: 14px; }
+}
+@media (max-height: 660px) {
+  .fr-shell--done { padding: 10px clamp(20px, 5vw, 48px); }
+  .fr-success-title { font-size: 22px; }
+  .fr-success-body { font-size: 14px; margin-top: 6px; }
+  .fr-success-list { margin-top: 8px; }
+  .fr-success-list > div { padding: 6px 0; }
+  .fr-success-list dd { font-size: 15px; }
+  .fr-success-manage { margin-top: 8px; }
+  .fr-success-actions { margin-top: 8px; }
+}
+/* Tiny legacy phones (e.g. 320x568): the buttons wrap to two rows, so drop the
+   secondary line and keep the essentials (details, manage link, actions) fully
+   visible without scrolling. Scoped narrow AND short so no modern device is touched. */
+@media (max-width: 360px) and (max-height: 600px) {
+  .fr-success-body { display: none; }
 }
 
 /* ============================================================
@@ -1966,27 +2050,41 @@ body::-webkit-scrollbar,
 
 /* ============================================================
    ROUTE LOADING — Next.js loading.tsx fallback during nav
-   Small centered spinner shown while the next page segment is
-   fetched/rendered. Reuses the splash spinner keyframe; track
-   colour is dark-on-light here (page background is off-white).
+   Full-screen themed splash shown while the next page segment is
+   fetched/rendered (the "Samir." wordmark + brown spinner + a
+   barbershop status line). Covers the header so the whole screen
+   transitions, the way the reference site does it.
    ============================================================ */
 .route-loading {
-  min-height: 70vh;
+  position: fixed;
+  inset: 0;
+  z-index: 90; /* over the header (50) and the open mobile menu (80) */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 144px 24px 96px; /* clear the fixed header */
+  padding: 24px;
+  background-color: var(--background);
+  /* faint warm halo behind the wordmark, echoing the splash */
+  background-image: radial-gradient(58% 48% at 50% 42%, oklch(50% 0.09 45 / 0.06), transparent 70%);
 }
 .route-loading-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   text-align: center;
 }
+.route-loading-wordmark {
+  font-size: clamp(40px, 8vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+.route-loading-wordmark .dot { color: var(--accent); }
 .route-loading-spinner {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid oklch(20% 0.015 60 / 0.10);
   border-top-color: var(--accent);
@@ -2002,3 +2100,4 @@ body::-webkit-scrollbar,
 @media (prefers-reduced-motion: reduce) {
   .route-loading-spinner { animation: none; }
 }
+

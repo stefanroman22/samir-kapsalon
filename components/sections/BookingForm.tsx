@@ -23,7 +23,8 @@ import {
 // always reachable. On mobile the summary collapses to a sticky bottom bar.
 const STORE = "samir.booking";
 const TZ = "Europe/Amsterdam"; // slot instants are UTC; display in the shop's timezone
-const WINDOW_DAYS = 14;
+const WEEK = 7; // the day picker shows one rolling week at a time
+const MAX_AHEAD_DAYS = 182; // ~6 months of forward browsing
 
 // The backend now returns an optional EUR price per service. lib/booking.ts is
 // generated/owned elsewhere, so we widen the type locally rather than editing it.
@@ -39,7 +40,6 @@ type State = {
   phone: string;
   email: string;
   notes: string;
-  ref: string | null;
   manageUrl: string | null;
 };
 
@@ -53,7 +53,6 @@ const INITIAL: State = {
   phone: "",
   email: "",
   notes: "",
-  ref: null,
   manageUrl: null,
 };
 
@@ -167,6 +166,10 @@ export function BookingForm() {
   const [slotsByDate, setSlotsByDate] = useState<Record<string, string[]> | null>(null);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  // Day-offset (multiple of 7) of the visible week in the day picker. 0 = the week starting today.
+  const [weekStart, setWeekStart] = useState(0);
+  // Slide direction for the week transition: 1 = forward (older slides left), -1 = back.
+  const [weekDir, setWeekDir] = useState(1);
 
   const patch = useCallback((p: Partial<State>) => setState((s) => ({ ...s, ...p })), []);
 
@@ -223,7 +226,13 @@ export function BookingForm() {
     };
   }, [state.serviceId]);
 
-  // Load availability whenever service or barber changes (the per-barber calendar).
+  // A new service or barber resets the calendar to the first (current) week.
+  useEffect(() => {
+    setWeekStart(0);
+  }, [state.serviceId, state.barberId]);
+
+  // Load availability for the visible week (per service + barber). Refetches when the
+  // customer pages to another week.
   useEffect(() => {
     if (!state.serviceId) {
       setSlotsByDate(null);
@@ -231,9 +240,9 @@ export function BookingForm() {
     }
     let alive = true;
     setSlotsLoading(true);
-    const now = new Date();
-    const from = shopDate(now.toISOString());
-    const to = shopDate(new Date(now.getTime() + WINDOW_DAYS * 86400_000).toISOString());
+    const now = Date.now();
+    const from = shopDate(new Date(now + weekStart * 86400_000).toISOString());
+    const to = shopDate(new Date(now + (weekStart + WEEK - 1) * 86400_000).toISOString());
     getAvailability(state.serviceId, from, to, state.barberId || undefined)
       .then((days) => {
         if (!alive) return;
@@ -251,12 +260,25 @@ export function BookingForm() {
     return () => {
       alive = false;
     };
-  }, [state.serviceId, state.barberId]);
+  }, [state.serviceId, state.barberId, weekStart]);
 
-  const availableDates = useMemo(
-    () => (slotsByDate ? Object.keys(slotsByDate).sort() : []),
-    [slotsByDate]
-  );
+  // The 7 calendar days of the visible week (yyyy-mm-dd, shop-local), dynamically from today.
+  const weekDays = useMemo(() => {
+    const now = Date.now();
+    return Array.from({ length: WEEK }, (_, i) =>
+      shopDate(new Date(now + (weekStart + i) * 86400_000).toISOString())
+    );
+  }, [weekStart]);
+  const canPrevWeek = weekStart > 0; // no going back before today
+  const canNextWeek = weekStart + WEEK <= MAX_AHEAD_DAYS; // cap forward browsing at ~6 months
+  // Week-strip slide: the outgoing week glides out, the new one glides in from the side.
+  const weekVariants = reduce
+    ? { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        enter: (dir: number) => ({ x: dir >= 0 ? "45%" : "-45%", opacity: 0 }),
+        center: { x: 0, opacity: 1 },
+        exit: (dir: number) => ({ x: dir >= 0 ? "-45%" : "45%", opacity: 0 }),
+      };
   const daySlots = state.date && slotsByDate ? (slotsByDate[state.date] ?? []) : [];
   const barber = resources?.find((b) => b.id === state.barberId) ?? null;
   const barberName = state.barberId ? (barber?.name ?? "—") : t("noPreference");
@@ -312,7 +334,6 @@ export function BookingForm() {
       setPhase("success");
       const reveal = () => {
         patch({
-          ref: res.booking_id ?? null,
           manageUrl: res.manage_url ?? null,
           step: 5,
         });
@@ -424,7 +445,8 @@ export function BookingForm() {
                     <span className="display fr-svc-price">{free ? t("free") : p}</span>
                   </span>
                   <span className="fr-svc-toggle" aria-hidden="true">
-                    {selected ? <IconCheck /> : <IconPlus />}
+                    <span className="fr-ic fr-ic--plus"><IconPlus /></span>
+                    <span className="fr-ic fr-ic--check"><IconCheck /></span>
                   </span>
                 </button>
               </li>
@@ -454,8 +476,11 @@ export function BookingForm() {
               <span className="fr-pro-desc">{t("barberAnyDesc")}</span>
             </span>
             <span className={`fr-pill${state.barberId === "" ? " is-on" : ""}`}>
-              {state.barberId === "" ? <IconCheck /> : null}
-              {state.barberId === "" ? t("selectedAction") : t("selectAction")}
+              <span className="fr-pill-icon" aria-hidden="true">
+                <span className="fr-ic fr-ic--plus"><IconPlus /></span>
+                <span className="fr-ic fr-ic--check"><IconCheck /></span>
+              </span>
+              <span className="fr-pill-label">{state.barberId === "" ? t("selectedAction") : t("selectAction")}</span>
             </span>
           </button>
         </li>
@@ -475,8 +500,11 @@ export function BookingForm() {
                   <span className="fr-pro-name">{b.name}</span>
                 </span>
                 <span className={`fr-pill${selected ? " is-on" : ""}`}>
-                  {selected ? <IconCheck /> : null}
-                  {selected ? t("selectedAction") : t("selectAction")}
+                  <span className="fr-pill-icon" aria-hidden="true">
+                    <span className="fr-ic fr-ic--plus"><IconPlus /></span>
+                    <span className="fr-ic fr-ic--check"><IconCheck /></span>
+                  </span>
+                  <span className="fr-pill-label">{selected ? t("selectedAction") : t("selectAction")}</span>
                 </span>
               </button>
             </li>
@@ -503,30 +531,68 @@ export function BookingForm() {
         </button>
       </div>
 
-      <div className="fr-pick-label eyebrow">{t("pickDay")}</div>
-      <div className="fr-date-strip">
-        {slotsLoading && <div className="fr-loading">…</div>}
-        {!slotsLoading && availableDates.length === 0 && (
-          <div className="fr-empty">{t("closedLabel")}</div>
-        )}
-        {!slotsLoading &&
-          availableDates.map((iso) => {
-            const d = new Date(iso + "T00:00");
-            const active = state.date === iso;
-            return (
-              <button
-                key={iso}
-                type="button"
-                className={`fr-date${active ? " is-active" : ""}`}
-                aria-pressed={active}
-                onClick={() => patch({ date: iso, slot: null })}
-              >
-                <span className="fr-date-dow">{d.toLocaleDateString(dateLocale, { weekday: "short" })}</span>
-                <span className="display fr-date-day">{d.getDate()}</span>
-                <span className="fr-date-mon">{d.toLocaleDateString(dateLocale, { month: "short" })}</span>
-              </button>
-            );
-          })}
+      <div className="fr-pick-head">
+        <span className="fr-pick-label eyebrow">{t("pickDay")}</span>
+        <div className="fr-week-nav">
+          <button
+            type="button"
+            className="fr-week-arrow"
+            aria-label={t("weekPrev")}
+            disabled={!canPrevWeek}
+            onClick={() => {
+              setWeekDir(-1);
+              setWeekStart((w) => Math.max(0, w - WEEK));
+            }}
+          >
+            <IconBack />
+          </button>
+          <button
+            type="button"
+            className="fr-week-arrow fr-week-arrow--next"
+            aria-label={t("weekNext")}
+            disabled={!canNextWeek}
+            onClick={() => {
+              setWeekDir(1);
+              setWeekStart((w) => Math.min(MAX_AHEAD_DAYS, w + WEEK));
+            }}
+          >
+            <IconBack />
+          </button>
+        </div>
+      </div>
+      <div className="fr-date-strip-wrap">
+        <AnimatePresence mode="popLayout" initial={false} custom={weekDir}>
+          <motion.div
+            key={weekStart}
+            className="fr-date-strip"
+            custom={weekDir}
+            variants={weekVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
+          >
+            {weekDays.map((iso) => {
+              const d = new Date(iso + "T00:00");
+              const active = state.date === iso;
+              const has = !!slotsByDate?.[iso]?.length;
+              return (
+                <button
+                  key={iso}
+                  type="button"
+                  className={`fr-date${active ? " is-active" : ""}`}
+                  aria-pressed={active}
+                  disabled={slotsLoading || !has}
+                  onClick={() => patch({ date: iso, slot: null })}
+                >
+                  <span className="fr-date-dow">{d.toLocaleDateString(dateLocale, { weekday: "short" })}</span>
+                  <span className="display fr-date-day">{d.getDate()}</span>
+                  <span className="fr-date-mon">{d.toLocaleDateString(dateLocale, { month: "short" })}</span>
+                </button>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <div className="fr-pick-label eyebrow mt-24">{t("pickTime")}</div>
@@ -771,14 +837,8 @@ export function BookingForm() {
   // Success screen (terminal). Replaces the whole two-column body.
   const successScreen = (
     <div className="fr-success">
-      <div className="success-mark" aria-hidden="true">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M8 12.5l3 3 5-6" />
-        </svg>
-      </div>
       <h2 className="display fr-success-title">{t("successTitle")}</h2>
-      <p className="lead mt-16">{t("successBody")}</p>
+      <p className="lead fr-success-body">{t("successBody")}</p>
       <dl className="fr-success-list">
         <div><dt>{t("confService")}</dt><dd>{service?.name ?? "—"}</dd></div>
         <div><dt>{t("confBarber")}</dt><dd>{barberName}</dd></div>
@@ -790,11 +850,10 @@ export function BookingForm() {
               : "—"}
           </dd>
         </div>
-        <div><dt>{t("refLabel")}</dt><dd>{state.ref ?? "—"}</dd></div>
       </dl>
       {state.manageUrl ? (
-        <p className="t-14 mt-16">
-          <a href={state.manageUrl} target="_blank" rel="noopener"><strong>{t("confWhen")} ↗</strong></a>
+        <p className="t-14 fr-success-manage">
+          <a className="fr-link" href={state.manageUrl} target="_blank" rel="noopener">{t("manageBooking")} ↗</a>
         </p>
       ) : null}
       <div className="fr-success-actions">

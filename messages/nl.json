@@ -6,6 +6,7 @@
   },
   "loader": {
     "loading": "Even de stoel klaarzetten…",
+    "routeLoading": "Bezig met knippen…",
     "ready": "Welkom bij Samir."
   },
   "nav": {
@@ -284,6 +285,8 @@
     "pane3Title": "Wanneer schikt?",
     "pickDay": "Kies een dag",
     "pickTime": "Kies een tijdstip",
+    "weekPrev": "Vorige week",
+    "weekNext": "Volgende week",
     "pickDayFirst": "Kies eerst een dag.",
     "closedLabel": "Gesloten",
     "pane4Eyebrow": "STAP 04 / 04",
@@ -315,7 +318,7 @@
     "submitError": "Er ging iets mis. Probeer opnieuw of bel ons.",
     "successTitle": "Tot ziens in de stoel.",
     "successBody": "Je afspraak is doorgegeven. Bewaar deze bevestiging — of zet 'm in je agenda.",
-    "refLabel": "Referentie",
+    "manageBooking": "Beheer je afspraak",
     "toHome": "← Naar home",
     "another": "Nog een boeking",
     "dateLocale": "nl-NL",

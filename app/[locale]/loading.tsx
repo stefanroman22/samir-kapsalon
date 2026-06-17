@@ -10,8 +10,11 @@ export default async function Loading() {
   return (
     <div className="route-loading" role="status" aria-live="polite">
       <div className="route-loading-inner">
+        <span className="route-loading-wordmark display" aria-hidden="true">
+          Samir<span className="dot">.</span>
+        </span>
         <span className="route-loading-spinner" aria-hidden="true" />
-        <span className="route-loading-text">{t("loading")}</span>
+        <span className="route-loading-text">{t("routeLoading")}</span>
       </div>
     </div>
   );
