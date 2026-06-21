@@ -231,8 +231,10 @@ export function BookingForm() {
     setWeekStart(0);
   }, [state.serviceId, state.barberId]);
 
-  // Load availability for the visible week (per service + barber). Refetches when the
-  // customer pages to another week.
+  // Preload availability for the WHOLE navigable horizon once per service + barber.
+  // Week navigation (the arrows) then reads this in-memory map with zero network — the
+  // backend range query is batched, so one wide request costs the same DB round-trips as
+  // one narrow week. `weekStart` only selects which 7 already-loaded days are shown.
   useEffect(() => {
     if (!state.serviceId) {
       setSlotsByDate(null);
@@ -241,8 +243,8 @@ export function BookingForm() {
     let alive = true;
     setSlotsLoading(true);
     const now = Date.now();
-    const from = shopDate(new Date(now + weekStart * 86400_000).toISOString());
-    const to = shopDate(new Date(now + (weekStart + WEEK - 1) * 86400_000).toISOString());
+    const from = shopDate(new Date(now).toISOString());
+    const to = shopDate(new Date(now + (MAX_AHEAD_DAYS + WEEK) * 86400_000).toISOString());
     getAvailability(state.serviceId, from, to, state.barberId || undefined)
       .then((days) => {
         if (!alive) return;
@@ -260,7 +262,7 @@ export function BookingForm() {
     return () => {
       alive = false;
     };
-  }, [state.serviceId, state.barberId, weekStart]);
+  }, [state.serviceId, state.barberId]);
 
   // The 7 calendar days of the visible week (yyyy-mm-dd, shop-local), dynamically from today.
   const weekDays = useMemo(() => {
