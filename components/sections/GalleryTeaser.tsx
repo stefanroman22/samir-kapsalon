@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 export async function GalleryTeaser() {
   const t = await getTranslations("galleryTeaser");
@@ -12,12 +13,12 @@ export async function GalleryTeaser() {
     <section className="section">
       <div className="container">
         <div className="section-head reveal">
-          <span className="eyebrow">{t("eyebrow")}</span>
+          <span className="eyebrow"><RichText value={t.raw("eyebrow")} format="inline" /></span>
           <div className="section-head-row">
             <h2 className="display section-title">
-              {t("titleLine1")}
+              <RichText value={t.raw("titleLine1")} format="inline" />
               <br />
-              {t("titleLine2")}
+              <RichText value={t.raw("titleLine2")} format="inline" />
             </h2>
             <Link className="btn btn--ghost section-head-btn" href="/galerij">
               {t("all")}

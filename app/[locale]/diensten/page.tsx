@@ -4,6 +4,7 @@ import { routing } from "@/i18n/routing";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { BookingStrip } from "@/components/sections/BookingStrip";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
+import { RichText } from "@/lib/cms-rich-text";
 
 type Props = { params: Promise<{ locale: string }> };
 type ServiceItem = { name: string; desc: string; meta: string; price: string };
@@ -36,12 +37,12 @@ export default async function DienstenPage({ params }: Props) {
 
   return (
     <>
-      <PageHeader eyebrow={t("eyebrow")} intro={t("intro")}>
-        {t("titleLine1")}
+      <PageHeader eyebrow={t.raw("eyebrow")} intro={t.raw("intro")}>
+        <RichText value={t.raw("titleLine1")} format="inline" />
         <br />
-        {t("titleLine2")}
+        <RichText value={t.raw("titleLine2")} format="inline" />
         <br />
-        <span className="text-accent">{t("titleLine3")}</span>
+        <span className="text-accent"><RichText value={t.raw("titleLine3")} format="inline" /></span>
       </PageHeader>
 
       <section className="section">
@@ -57,7 +58,7 @@ export default async function DienstenPage({ params }: Props) {
                   <li className="service-row" key={item.name}>
                     <div className="service-main">
                       <h3 className="service-name display">{item.name}</h3>
-                      <p className="service-desc t-14 text-muted">{item.desc}</p>
+                      <p className="service-desc t-14 text-muted"><RichText value={item.desc} format="inline" /></p>
                     </div>
                     <div className="service-pricegroup">
                       <span className="service-price">{item.price}</span>
@@ -75,11 +76,13 @@ export default async function DienstenPage({ params }: Props) {
         <div className="container notes-grid">
           {notes.map((note) => (
             <div className="reveal" key={note.eyebrow}>
-              <span className="eyebrow">{note.eyebrow}</span>
+              <span className="eyebrow">
+                <RichText value={note.eyebrow} format="inline" />
+              </span>
               <h3 className="display mt-16" style={{ fontSize: "32px", lineHeight: 1 }}>
-                {note.title}
+                <RichText value={note.title} format="inline" />
               </h3>
-              <p className="t-16 mt-16 text-muted">{note.body}</p>
+              <RichText as="div" className="t-16 mt-16 text-muted" value={note.body} format="rich" />
             </div>
           ))}
         </div>

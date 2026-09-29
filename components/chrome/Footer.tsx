@@ -4,6 +4,7 @@ import { HoursTable } from "./HoursTable";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NAV, BOOK_HREF } from "@/lib/site";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 export async function Footer() {
   const t = await getTranslations("footer");
@@ -19,7 +20,7 @@ export async function Footer() {
               SAMIR<span style={{ color: "var(--accent)" }}>.</span>KAPSALON
             </span>
             <p className="t-14 mt-24" style={{ opacity: 0.6, maxWidth: "36ch" }}>
-              {t("tagline")}
+              <RichText value={t.raw("tagline")} format="inline" />
             </p>
           </div>
 

@@ -1,0 +1,26 @@
+{
+  "repeaters": {
+    "reviews_items": { "text": "inline" },
+    "service_menu": { "desc": "inline" },
+    "services_teaser_items": { "desc": "inline" },
+    "service_notes": { "eyebrow": "inline", "title": "inline", "body": "richtext" },
+    "team_members": { "bio": "richtext" }
+  },
+  "key_values": {
+    "about": { "eyebrow": "inline", "titleLine1": "inline", "titleLine2": "inline", "paragraph": "rich" },
+    "hero": { "titleLine1": "inline", "titleLine2": "inline", "sub": "inline" },
+    "services_teaser": { "eyebrow": "inline", "titleLine1": "inline", "titleLine2": "inline" },
+    "gallery_teaser": { "eyebrow": "inline", "titleLine1": "inline", "titleLine2": "inline" },
+    "reviews_section": { "eyebrow": "inline" },
+    "instagram": { "eyebrow": "inline" },
+    "location_strip": { "eyebrow": "inline" },
+    "diensten_header": { "eyebrow": "inline", "intro": "inline", "titleLine1": "inline", "titleLine2": "inline", "titleLine3": "inline" },
+    "team_header": { "eyebrow": "inline", "intro": "inline", "titleLine1": "inline", "titleLine2": "inline", "titleLine3": "inline" },
+    "gallery_header": { "eyebrow": "inline", "intro": "inline", "caption": "inline", "titleLine1": "inline", "titleLine2": "inline" },
+    "contact_content": {
+      "eyebrow": "inline", "titleLine1": "inline", "titleLine2": "inline", "callNote": "inline",
+      "hoursEyebrow": "inline", "hoursTitle": "inline", "hoursBody": "rich", "parkingBody": "rich"
+    },
+    "footer": { "tagline": "inline" }
+  }
+}

@@ -3,6 +3,7 @@ import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BOOK_HREF } from "@/lib/site";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 export async function Hero() {
   const t = await getTranslations("hero");
@@ -27,12 +28,12 @@ export async function Hero() {
           {t("location")}
         </span>
         <h1 className="display hero-title">
-          {t("titleLine1")}
+          <RichText value={t.raw("titleLine1")} format="inline" />
           <br />
-          <em className="hero-em">{t("titleLine2")}</em>
+          <em className="hero-em"><RichText value={t.raw("titleLine2")} format="inline" /></em>
         </h1>
         <div className="hero-foot">
-          <p className="hero-sub">{t("sub")}</p>
+          <p className="hero-sub"><RichText value={t.raw("sub")} format="inline" /></p>
           <div className="hero-actions">
             <Link className="btn btn--accent btn--lg" href={BOOK_HREF}>
               {t("book")}

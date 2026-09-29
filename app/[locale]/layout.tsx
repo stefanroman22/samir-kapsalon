@@ -11,6 +11,7 @@ import { Header } from "@/components/chrome/Header";
 import { Footer } from "@/components/chrome/Footer";
 import { CookieStrip } from "@/components/chrome/CookieStrip";
 import "../globals.css";
+import "@/lib/cms-rich-text/cms-rich.css";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

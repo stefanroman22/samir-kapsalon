@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { HoursTable } from "@/components/chrome/HoursTable";
 import { MapCard } from "@/components/sections/MapCard";
 import { BUSINESS } from "@/lib/site";
+import { RichText } from "@/lib/cms-rich-text";
 
 export async function LocationStrip() {
   const t = await getTranslations("location");
@@ -10,7 +11,7 @@ export async function LocationStrip() {
     <section className="section location-strip">
       <div className="container location-grid">
         <div className="location-copy reveal">
-          <span className="eyebrow">{t("eyebrow")}</span>
+          <span className="eyebrow"><RichText value={t.raw("eyebrow")} format="inline" /></span>
           <h2 className="display mt-16" style={{ fontSize: "clamp(40px, 5vw, 72px)", lineHeight: 0.95 }}>
             {t("streetLine")}
             <br />

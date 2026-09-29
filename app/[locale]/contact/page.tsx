@@ -7,6 +7,7 @@ import { MapCard } from "@/components/sections/MapCard";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { BOOK_HREF } from "@/lib/site";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -38,11 +39,11 @@ export default async function ContactPage({ params }: Props) {
       <section className="contact-hero">
         <div className="container contact-grid">
           <div className="contact-left reveal">
-            <span className="eyebrow eyebrow--accent">{t("eyebrow")}</span>
+            <span className="eyebrow eyebrow--accent"><RichText value={t.raw("eyebrow")} format="inline" /></span>
             <h1 className="display contact-title">
-              {t("titleLine1")}
+              <RichText value={t.raw("titleLine1")} format="inline" />
               <br />
-              <span className="text-accent">{t("titleLine2")}</span>
+              <span className="text-accent"><RichText value={t.raw("titleLine2")} format="inline" /></span>
             </h1>
 
             <div className="contact-block mt-32">
@@ -65,7 +66,7 @@ export default async function ContactPage({ params }: Props) {
               <p className="contact-line">
                 <a href={contact.phoneHref}>{contact.phoneDisplay}</a>
               </p>
-              <span className="t-14 text-muted">{t("callNote")}</span>
+              <span className="t-14 text-muted"><RichText value={t.raw("callNote")} format="inline" /></span>
             </div>
 
             <div className="contact-block">
@@ -79,7 +80,7 @@ export default async function ContactPage({ params }: Props) {
 
             <div className="contact-block">
               <span className="eyebrow">{t("parkingLabel")}</span>
-              <p className="t-14 contact-line text-muted">{t("parkingBody")}</p>
+              <RichText as="div" className="t-14 contact-line text-muted" value={t.raw("parkingBody")} format="rich" />
             </div>
 
             <Link className="btn btn--accent btn--lg mt-32" href={BOOK_HREF}>
@@ -96,11 +97,11 @@ export default async function ContactPage({ params }: Props) {
       <section className="section">
         <div className="container hours-row">
           <div>
-            <span className="eyebrow eyebrow--accent">{t("hoursEyebrow")}</span>
+            <span className="eyebrow eyebrow--accent"><RichText value={t.raw("hoursEyebrow")} format="inline" /></span>
             <h2 className="display mt-16" style={{ fontSize: "clamp(36px, 5vw, 64px)", lineHeight: 0.95 }}>
-              {t("hoursTitle")}
+              <RichText value={t.raw("hoursTitle")} format="inline" />
             </h2>
-            <p className="lead mt-16">{t("hoursBody")}</p>
+            <RichText as="div" className="lead mt-16" value={t.raw("hoursBody")} format="rich" />
           </div>
           <HoursTable variant="big" />
         </div>

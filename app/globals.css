@@ -73,6 +73,28 @@
   --input:                oklch(24% 0.010 50);
 }
 
+/* ---------- CMS rich text (lib/cms-rich-text) ----------
+   Light surfaces: bold keeps the ink colour (weight only), links use the accent
+   (>= 4.5:1 on the light background). Accent is too dark on the charcoal surfaces
+   below, so there links/bold follow the surface's own text colour. */
+:root {
+  --cms-rich-strong: currentColor;
+  --cms-rich-strong-weight: 700;
+  --cms-rich-link: var(--accent);
+  --cms-rich-link-hover: var(--accent-hover);
+  --cms-rich-marker: var(--accent);
+  --cms-rich-quote-border: var(--accent);
+  --cms-rich-rule: var(--border);
+}
+.hero, .trust-band, .reviews, .booking-strip, .site-footer {
+  --cms-rich-strong: currentColor;
+  --cms-rich-link: currentColor;
+  --cms-rich-link-hover: currentColor;
+  --cms-rich-marker: oklch(96% 0.005 80 / 0.6);
+  --cms-rich-quote-border: oklch(96% 0.005 80 / 0.6);
+  --cms-rich-rule: oklch(96% 0.005 80 / 0.3);
+}
+
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; overflow-x: hidden; }

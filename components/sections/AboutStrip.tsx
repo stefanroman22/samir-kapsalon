@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getTranslations, getMessages } from "next-intl/server";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 export async function AboutStrip() {
   const t = await getTranslations("about");
@@ -10,16 +11,16 @@ export async function AboutStrip() {
     <section className="section about-strip">
       <div className="container about-grid">
         <div className="about-copy reveal">
-          <span className="eyebrow">{t("eyebrow")}</span>
+          <span className="eyebrow"><RichText value={t.raw("eyebrow")} format="inline" /></span>
           <h2
             className="display section-title mt-16"
             style={{ fontSize: "clamp(32px, 4.2vw, 56px)" }}
           >
-            {t("titleLine1")}
+            <RichText value={t.raw("titleLine1")} format="inline" />
             <br />
-            {t("titleLine2")}
+            <RichText value={t.raw("titleLine2")} format="inline" />
           </h2>
-          <p className="lead mt-24">{t("paragraph")}</p>
+          <RichText as="div" className="lead mt-24" value={t.raw("paragraph")} format="rich" />
           <div className="about-meta mt-32">
             <div>
               <span className="display about-stat">{t("stat1Value")}</span>

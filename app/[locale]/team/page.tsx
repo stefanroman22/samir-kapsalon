@@ -8,6 +8,7 @@ import { BookingStrip } from "@/components/sections/BookingStrip";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { BOOK_HREF, TEAM } from "@/lib/site";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 type Props = { params: Promise<{ locale: string }> };
 type Member = {
@@ -47,12 +48,12 @@ export default async function TeamPage({ params }: Props) {
 
   return (
     <>
-      <PageHeader eyebrow={t("eyebrow")} intro={t("intro")}>
-        {t("titleLine1")}
+      <PageHeader eyebrow={t.raw("eyebrow")} intro={t.raw("intro")}>
+        <RichText value={t.raw("titleLine1")} format="inline" />
         <br />
-        {t("titleLine2")}
+        <RichText value={t.raw("titleLine2")} format="inline" />
         <br />
-        <span className="text-accent">{t("titleLine3")}</span>
+        <span className="text-accent"><RichText value={t.raw("titleLine3")} format="inline" /></span>
       </PageHeader>
 
       <section className="section">
@@ -81,7 +82,7 @@ export default async function TeamPage({ params }: Props) {
                     <span className="t-12 eyebrow">{m.role}</span>
                   </div>
                   <h2 className="display team-name">{name}</h2>
-                  <p className="t-16 text-muted team-bio">{m.bio}</p>
+                  <RichText as="div" className="t-16 text-muted team-bio" value={m.bio} format="rich" />
                   <ul className="team-tags">
                     {tags.map((tag) => (
                       <li key={tag}>{tag}</li>

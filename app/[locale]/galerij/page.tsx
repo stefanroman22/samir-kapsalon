@@ -4,6 +4,7 @@ import { routing } from "@/i18n/routing";
 import { GalleryGrid } from "@/components/sections/GalleryGrid";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -35,14 +36,14 @@ export default async function GalerijPage({ params }: Props) {
       <section className="page-header">
         <div className="container page-header-row">
           <div>
-            <span className="eyebrow eyebrow--accent">{t("eyebrow")}</span>
+            <span className="eyebrow eyebrow--accent"><RichText value={t.raw("eyebrow")} format="inline" /></span>
             <h1 className="display page-title">
-              {t("titleLine1")}
+              <RichText value={t.raw("titleLine1")} format="inline" />
               <br />
-              {t("titleLine2")}
+              <RichText value={t.raw("titleLine2")} format="inline" />
             </h1>
           </div>
-          <p className="lead page-intro">{t("intro")}</p>
+          <p className="lead page-intro"><RichText value={t.raw("intro")} format="inline" /></p>
         </div>
       </section>
 
@@ -61,7 +62,7 @@ export default async function GalerijPage({ params }: Props) {
           <div className="gallery-caption mt-48 reveal">
             <span className="rule" aria-hidden="true" />
             <p className="t-14 text-muted" style={{ maxWidth: "56ch" }}>
-              {t("caption")}
+              <RichText value={t.raw("caption")} format="inline" />
             </p>
           </div>
         </div>

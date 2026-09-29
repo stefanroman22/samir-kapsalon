@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { BUSINESS } from "@/lib/site";
+import { RichText } from "@/lib/cms-rich-text";
 
 type Review = { text: string; author: string; when: string };
 
@@ -10,14 +11,14 @@ export async function Reviews() {
   return (
     <section className="section reviews">
       <div className="container">
-        <span className="eyebrow reveal">{t("eyebrow")}</span>
+        <span className="eyebrow reveal"><RichText value={t.raw("eyebrow")} format="inline" /></span>
         <div className="reviews-grid">
           {items.map((r) => (
             <figure className="review reveal" key={r.author}>
               <span className="review-quote-mark display" aria-hidden="true">
                 &ldquo;
               </span>
-              <blockquote className="review-text display">{r.text}</blockquote>
+              <blockquote className="review-text display"><RichText value={r.text} format="inline" /></blockquote>
               <figcaption className="review-cite">
                 <span className="t-14">
                   <strong>{r.author}</strong> — <span>{r.when}</span>

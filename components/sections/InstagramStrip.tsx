@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getTranslations, getMessages } from "next-intl/server";
 import { resolveSite } from "@/lib/cms-site";
+import { RichText } from "@/lib/cms-rich-text";
 
 export async function InstagramStrip() {
   const t = await getTranslations("instagram");
@@ -10,7 +11,7 @@ export async function InstagramStrip() {
     <section className="section section--tight ig-strip">
       <div className="container">
         <div className="ig-head reveal">
-          <span className="eyebrow">{t("eyebrow")}</span>
+          <span className="eyebrow"><RichText value={t.raw("eyebrow")} format="inline" /></span>
           <a href={contact.instagram} target="_blank" rel="noopener" className="ig-handle">
             {contact.instagramHandle || t("handle")}
           </a>
