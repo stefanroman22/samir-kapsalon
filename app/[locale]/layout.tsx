@@ -10,6 +10,8 @@ import { ScrollProgress } from "@/components/chrome/ScrollProgress";
 import { Header } from "@/components/chrome/Header";
 import { Footer } from "@/components/chrome/Footer";
 import { CookieStrip } from "@/components/chrome/CookieStrip";
+import { resolveSite } from "@/lib/cms-site";
+import { ThemeStyles } from "@/lib/cms-rich-text";
 import "../globals.css";
 import "@/lib/cms-rich-text/cms-rich.css";
 
@@ -75,6 +77,10 @@ export default async function LocaleLayout({
       // which is an expected, unavoidable mismatch — silence the cosmetic warning here.
       suppressHydrationWarning
     >
+      <head>
+        {/* CMS theme fonts (--cms-font-body / --cms-font-heading); renders nothing without a theme. */}
+        <ThemeStyles theme={resolveSite(messages).theme} />
+      </head>
       <body>
         {/* Translation resilience. In-browser translators (Google Translate, extensions)
             reparent text nodes into <font> wrappers. React's commit phase then calls

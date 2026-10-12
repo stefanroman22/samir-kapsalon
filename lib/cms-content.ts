@@ -61,7 +61,7 @@ function cmsToMessages(content: Json): Json {
   const reviews = items("reviews_items");
   if (reviews) (ns("reviews") as Json).items = reviews;
 
-  // ── Non-message site data (images, hours, contact, brand) ──────────────────
+  // ── Non-message site data (images, hours, contact, brand, theme) ───────────
   // These services don't map to a text namespace; they back the static constants
   // in `lib/site.ts`. We surface them under a `site` namespace that `resolveSite`
   // (lib/cms-site.ts) reads, falling back to the static constants when absent.
@@ -74,6 +74,15 @@ function cmsToMessages(content: Json): Json {
   if (Array.isArray(hours) && hours.length) site.hours = hours;
   const heroUrl = (content.hero_image as Json | undefined)?.url;
   if (typeof heroUrl === "string" && heroUrl) site.heroImage = heroUrl;
+  const heroAlt = (content.hero_image as Json | undefined)?.alt;
+  if (typeof heroAlt === "string" && heroAlt.trim()) site.heroImageAlt = heroAlt;
+  // Map card illustration: an uploaded image replaces the in-code SVG map when set.
+  const map = content.location_map_image as Json | undefined;
+  if (typeof map?.url === "string" && map.url) site.mapImage = map.url;
+  if (typeof map?.alt === "string" && map.alt.trim()) site.mapImageAlt = map.alt;
+  // Project theme (ADR-0011): raw value, validated by the kit's readTheme in resolveSite.
+  const theme = content.general_theme;
+  if (theme && typeof theme === "object") site.theme = theme;
   const gallery = (key: string): string[] | null => {
     const arr = (content[key] as Json | undefined)?.items;
     return Array.isArray(arr) && arr.length ? (arr as string[]) : null;

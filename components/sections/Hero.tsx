@@ -2,7 +2,7 @@ import Image from "next/image";
 import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BOOK_HREF } from "@/lib/site";
-import { resolveSite } from "@/lib/cms-site";
+import { resolveSite, isSvgUrl } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
 
 export async function Hero() {
@@ -14,7 +14,8 @@ export async function Hero() {
       <div className="hero-media editorial" data-placeholder="true">
         <Image
           src={site.heroImage}
-          alt={t("imageAlt")}
+          unoptimized={isSvgUrl(site.heroImage)}
+          alt={site.heroImageAlt ?? t("imageAlt")}
           fill
           priority
           sizes="100vw"

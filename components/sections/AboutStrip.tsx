@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { getTranslations, getMessages } from "next-intl/server";
-import { resolveSite } from "@/lib/cms-site";
+import { resolveSite, isSvgUrl } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
 
 export async function AboutStrip() {
@@ -41,6 +41,7 @@ export async function AboutStrip() {
           <div className="editorial ratio-45" data-placeholder="true">
             <Image
               src={aboutImages[0]}
+              unoptimized={isSvgUrl(aboutImages[0])}
               alt={t("img1Alt")}
               fill
               sizes="(max-width: 1024px) 60vw, 30vw"
@@ -50,6 +51,7 @@ export async function AboutStrip() {
           <div className="editorial ratio-11 about-img-2" data-placeholder="true">
             <Image
               src={aboutImages[1]}
+              unoptimized={isSvgUrl(aboutImages[1])}
               alt={t("img2Alt")}
               fill
               sizes="(max-width: 1024px) 30vw, 15vw"

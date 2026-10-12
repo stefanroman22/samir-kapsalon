@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { isSvgUrl } from "@/lib/cms-site";
 import { useCallback, useEffect, useState } from "react";
 
 type GalleryImage = { src: string; span: number };
@@ -58,6 +59,7 @@ export function GalleryGrid({
           >
             <Image
               src={img.src}
+              unoptimized={isSvgUrl(img.src)}
               alt=""
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -85,7 +87,7 @@ export function GalleryGrid({
         </button>
         <div className="lightbox-stage" onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
           {open ? (
-            <Image src={images[idx].src} alt="" fill sizes="100vw" style={{ objectFit: "contain" }} />
+            <Image src={images[idx].src} unoptimized={isSvgUrl(images[idx].src)} alt="" fill sizes="100vw" style={{ objectFit: "contain" }} />
           ) : null}
         </div>
         <div className="lightbox-count">

@@ -3,12 +3,18 @@
 /* ============================================================
    SAMIR KAPSALON — globals.css
    Industrial-utilitarian. Charcoal + off-white + tobacco.
-   Display font (--font-display) + body font (--font-body) are
-   provided by next/font (Anton + self-hosted Switzer) on <html>.
+   Display font (--font-display) + body font (--font-body) are the
+   CMS theme fonts (--cms-font-heading / --cms-font-body, set by
+   <ThemeStyles>) with the next/font defaults (Anton + self-hosted
+   Switzer, --font-*-default on <html>) as fallback.
    ============================================================ */
 
 /* ---------- Tokens (light) ---------- */
 :root {
+  /* font */
+  --font-display: var(--cms-font-heading, var(--font-display-default));
+  --font-body:    var(--cms-font-body, var(--font-body-default));
+
   /* color */
   --background:           oklch(96% 0.005 80);
   --foreground:           oklch(20% 0.015 60);

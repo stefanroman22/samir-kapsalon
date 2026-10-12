@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/sections/PageHeader";
 import { BookingStrip } from "@/components/sections/BookingStrip";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { BOOK_HREF, TEAM } from "@/lib/site";
-import { resolveSite } from "@/lib/cms-site";
+import { resolveSite, isSvgUrl } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -64,13 +64,15 @@ export default async function TeamPage({ params }: Props) {
               // name/portrait/tags are CMS-editable (team_members); fall back to the
               // static TEAM constant so the card never breaks if the CMS is absent.
               const name = m.name ?? person.name;
-              const portrait = m.portrait ?? person.portrait;
+              // `||`: an emptied CMS image field is "" and must fall back too.
+              const portrait = m.portrait || person.portrait;
               const tags = m.tags ?? person.tags;
               return (
                 <article className="team-card reveal" key={person.barberKey}>
                   <div className="editorial team-portrait" data-placeholder="true">
                     <Image
                       src={portrait}
+                      unoptimized={isSvgUrl(portrait)}
                       alt={m.portraitAlt}
                       fill
                       sizes="(max-width: 1024px) 100vw, 50vw"

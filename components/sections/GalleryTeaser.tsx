@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { getTranslations, getMessages } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { resolveSite } from "@/lib/cms-site";
+import { resolveSite, isSvgUrl } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
 
 export async function GalleryTeaser() {
@@ -36,6 +36,7 @@ export async function GalleryTeaser() {
             >
               <Image
                 src={src}
+                unoptimized={isSvgUrl(src)}
                 alt={alts[i] ?? ""}
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"

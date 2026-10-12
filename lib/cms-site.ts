@@ -19,6 +19,7 @@ import {
   GALLERY_IMAGES,
   INSTAGRAM_IMAGES,
 } from "@/lib/site";
+import { readTheme, type CmsTheme } from "@/lib/cms-rich-text";
 
 export interface HoursRow {
   messageKey: string;
@@ -39,12 +40,19 @@ export interface SiteContact {
 export interface SiteData {
   brandName: string;
   heroImage: string;
+  /** CMS `hero_image.alt`; null when empty (callers fall back to the messages alt). */
+  heroImageAlt: string | null;
+  /** CMS `location_map_image`; null when empty (MapCard keeps its SVG map). */
+  mapImage: string | null;
+  mapImageAlt: string | null;
   aboutImages: string[];
   galleryTeaserImages: string[];
   galleryImages: { src: string; span: number }[];
   instagramImages: string[];
   hours: HoursRow[];
   contact: SiteContact;
+  /** CMS `general_theme` (palette + fonts); null when absent. */
+  theme: CmsTheme | null;
 }
 
 function telHref(phone: string): string {
@@ -70,8 +78,13 @@ function splitAddress(addr: string): string[] {
 const str = (v: unknown): string | null =>
   typeof v === "string" && v.trim() ? v.trim() : null;
 
-const strArr = (v: unknown, fallback: readonly string[]): string[] =>
-  Array.isArray(v) && v.length ? (v.filter((x) => typeof x === "string") as string[]) : [...fallback];
+/** True when the URL path (ignoring query/hash) is an SVG; next/image must skip the optimizer for these. */
+export const isSvgUrl = (url: string): boolean => /\.svg$/i.test(url.split(/[?#]/)[0]);
+
+const strArr = (v: unknown, fallback: readonly string[]): string[] => {
+  const arr = Array.isArray(v) ? (v.filter((x) => typeof x === "string" && x.trim() !== "") as string[]) : [];
+  return arr.length ? arr : [...fallback];
+};
 
 export function resolveSite(messages: unknown): SiteData {
   const site = ((messages as Record<string, unknown> | null)?.site ?? {}) as Record<string, unknown>;
@@ -115,11 +128,15 @@ export function resolveSite(messages: unknown): SiteData {
   return {
     brandName: str(site.brandName) ?? BUSINESS.wordmark,
     heroImage: str(site.heroImage) ?? HERO_IMAGE,
+    heroImageAlt: str(site.heroImageAlt),
+    mapImage: str(site.mapImage),
+    mapImageAlt: str(site.mapImageAlt),
     aboutImages: strArr(site.aboutImages, ABOUT_IMAGES),
     galleryTeaserImages: strArr(site.galleryTeaserImages, GALLERY_TEASER_IMAGES),
     instagramImages: strArr(site.instagramImages, INSTAGRAM_IMAGES),
     galleryImages,
     hours,
     contact,
+    theme: readTheme(site.theme),
   };
 }

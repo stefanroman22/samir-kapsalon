@@ -3,10 +3,12 @@ import localFont from "next/font/local";
 
 // Display: Anton (Google) — Druk-style condensed, the free fallback the brief names
 // for "GT America Condensed". Single weight (400) by design.
+// Bundled defaults: globals.css maps --font-display / --font-body to the CMS theme
+// fonts (--cms-font-heading / --cms-font-body) and falls back to these.
 export const displayFont = Anton({
   subsets: ["latin"],
   weight: "400",
-  variable: "--font-display",
+  variable: "--font-display-default",
   display: "swap",
 });
 
@@ -18,6 +20,6 @@ export const bodyFont = localFont({
     { path: "../app/fonts/switzer-600.woff2", weight: "600", style: "normal" },
     { path: "../app/fonts/switzer-700.woff2", weight: "700", style: "normal" },
   ],
-  variable: "--font-body",
+  variable: "--font-body-default",
   display: "swap",
 });
