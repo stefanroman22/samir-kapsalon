@@ -118,6 +118,64 @@
     "booking_page_header": {
       "type": "key_value",
       "page": "Book"
+    },
+    "home_page_options": {
+      "type": "options",
+      "page": "Home",
+      "schema": {
+        "background": "color",
+        "content_width": "select",
+        "about_image_position": "select",
+        "show_reviews": "toggle",
+        "show_instagram": "toggle"
+      }
+    },
+    "services_page_options": {
+      "type": "options",
+      "page": "Services",
+      "schema": {
+        "background": "color",
+        "content_width": "select",
+        "card_background": "color",
+        "show_booking_strip": "toggle"
+      }
+    },
+    "team_page_options": {
+      "type": "options",
+      "page": "Team",
+      "schema": {
+        "background": "color",
+        "content_width": "select",
+        "show_careers": "toggle",
+        "show_booking_strip": "toggle"
+      }
+    },
+    "gallery_page_options": {
+      "type": "options",
+      "page": "Gallery",
+      "schema": {
+        "background": "color",
+        "content_width": "select",
+        "show_caption": "toggle"
+      }
+    },
+    "contact_page_options": {
+      "type": "options",
+      "page": "Contact",
+      "schema": {
+        "background": "color",
+        "content_width": "select",
+        "map_position": "select",
+        "show_hours": "toggle"
+      }
+    },
+    "book_page_options": {
+      "type": "options",
+      "page": "Book",
+      "schema": {
+        "background": "color",
+        "content_width": "select"
+      }
     }
   },
   "booking": {

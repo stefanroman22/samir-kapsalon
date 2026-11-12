@@ -9,6 +9,7 @@ import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { BOOK_HREF, TEAM } from "@/lib/site";
 import { resolveSite, isSvgUrl } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
+import { pageSurface, teamPageOptions } from "@/lib/page-options";
 
 type Props = { params: Promise<{ locale: string }> };
 type Member = {
@@ -44,10 +45,14 @@ export default async function TeamPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations("team");
   const members = t.raw("members") as Member[];
-  const { contact } = resolveSite(await getMessages());
+  const messages = await getMessages();
+  const { contact } = resolveSite(messages);
+  // CMS display options (team_page_options, ADR-0013); defaults = the designed page.
+  const options = teamPageOptions(messages);
+  const surface = pageSurface(options);
 
   return (
-    <>
+    <div className={surface.className} style={surface.style}>
       <PageHeader eyebrow={t.raw("eyebrow")} intro={t.raw("intro")}>
         <RichText value={t.raw("titleLine1")} format="inline" />
         <br />
@@ -106,26 +111,28 @@ export default async function TeamPage({ params }: Props) {
             })}
           </div>
 
-          <div className="team-careers mt-64 reveal">
-            <span className="eyebrow">{t("careersEyebrow")}</span>
-            <h3
-              className="display mt-16"
-              style={{ fontSize: "clamp(32px, 4vw, 56px)", lineHeight: 1, maxWidth: "22ch" }}
-            >
-              {t("careersTitle")}
-            </h3>
-            <p className="t-16 mt-16 text-muted" style={{ maxWidth: "56ch" }}>
-              {t("careersBody")}
-            </p>
-            <a href={contact.instagram} target="_blank" rel="noopener" className="btn btn--ghost mt-24">
-              {t("careersCta")}
-            </a>
-          </div>
+          {options.show_careers && (
+            <div className="team-careers mt-64 reveal">
+              <span className="eyebrow">{t("careersEyebrow")}</span>
+              <h3
+                className="display mt-16"
+                style={{ fontSize: "clamp(32px, 4vw, 56px)", lineHeight: 1, maxWidth: "22ch" }}
+              >
+                {t("careersTitle")}
+              </h3>
+              <p className="t-16 mt-16 text-muted" style={{ maxWidth: "56ch" }}>
+                {t("careersBody")}
+              </p>
+              <a href={contact.instagram} target="_blank" rel="noopener" className="btn btn--ghost mt-24">
+                {t("careersCta")}
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
-      <BookingStrip titleKey="team" />
+      {options.show_booking_strip && <BookingStrip titleKey="team" />}
       <RevealObserver />
-    </>
+    </div>
   );
 }

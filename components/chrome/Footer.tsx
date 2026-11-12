@@ -19,7 +19,7 @@ export async function Footer() {
             <span className="footer-wordmark">
               SAMIR<span style={{ color: "var(--accent)" }}>.</span>KAPSALON
             </span>
-            <p className="t-14 mt-24" style={{ opacity: 0.6, maxWidth: "36ch" }}>
+            <p className="t-14 mt-24" style={{ color: "color-mix(in srgb, var(--primary-foreground) 60%, transparent)", maxWidth: "36ch" }}>
               <RichText value={t.raw("tagline")} format="inline" />
             </p>
           </div>

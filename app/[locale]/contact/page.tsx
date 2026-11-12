@@ -8,6 +8,7 @@ import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { BOOK_HREF } from "@/lib/site";
 import { resolveSite } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
+import { contactPageOptions, pageSurface } from "@/lib/page-options";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -32,12 +33,19 @@ export default async function ContactPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("contact");
-  const { contact } = resolveSite(await getMessages());
+  const messages = await getMessages();
+  const { contact } = resolveSite(messages);
+  // CMS display options (contact_page_options, ADR-0013); defaults = the designed page.
+  const options = contactPageOptions(messages);
+  const surface = pageSurface(options);
+  // map_position: right (designed) | left | hidden.
+  const gridVariant =
+    options.map_position === "left" ? " contact-grid--map-left" : options.map_position === "hidden" ? " contact-grid--no-map" : "";
 
   return (
-    <>
+    <div className={surface.className} style={surface.style}>
       <section className="contact-hero">
-        <div className="container contact-grid">
+        <div className={`container contact-grid${gridVariant}`}>
           <div className="contact-left reveal">
             <span className="eyebrow eyebrow--accent"><RichText value={t.raw("eyebrow")} format="inline" /></span>
             <h1 className="display contact-title">
@@ -88,26 +96,30 @@ export default async function ContactPage({ params }: Props) {
             </Link>
           </div>
 
-          <div className="contact-right reveal">
-            <MapCard />
-          </div>
+          {options.map_position !== "hidden" && (
+            <div className="contact-right reveal">
+              <MapCard />
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="section">
-        <div className="container hours-row">
-          <div>
-            <span className="eyebrow eyebrow--accent"><RichText value={t.raw("hoursEyebrow")} format="inline" /></span>
-            <h2 className="display mt-16" style={{ fontSize: "clamp(36px, 5vw, 64px)", lineHeight: 0.95 }}>
-              <RichText value={t.raw("hoursTitle")} format="inline" />
-            </h2>
-            <RichText as="div" className="lead mt-16" value={t.raw("hoursBody")} format="rich" />
+      {options.show_hours && (
+        <section className="section">
+          <div className="container hours-row">
+            <div>
+              <span className="eyebrow eyebrow--accent"><RichText value={t.raw("hoursEyebrow")} format="inline" /></span>
+              <h2 className="display mt-16" style={{ fontSize: "clamp(36px, 5vw, 64px)", lineHeight: 0.95 }}>
+                <RichText value={t.raw("hoursTitle")} format="inline" />
+              </h2>
+              <RichText as="div" className="lead mt-16" value={t.raw("hoursBody")} format="rich" />
+            </div>
+            <HoursTable variant="big" />
           </div>
-          <HoursTable variant="big" />
-        </div>
-      </section>
+        </section>
+      )}
 
       <RevealObserver />
-    </>
+    </div>
   );
 }

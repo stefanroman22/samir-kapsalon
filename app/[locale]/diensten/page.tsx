@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { PageHeader } from "@/components/sections/PageHeader";
 import { BookingStrip } from "@/components/sections/BookingStrip";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { RichText } from "@/lib/cms-rich-text";
+import { pageSurface, servicesPageOptions } from "@/lib/page-options";
 
 type Props = { params: Promise<{ locale: string }> };
 type ServiceItem = { name: string; desc: string; meta: string; price: string };
@@ -34,9 +35,12 @@ export default async function DienstenPage({ params }: Props) {
   const t = await getTranslations("diensten");
   const groups = t.raw("groups") as Group[];
   const notes = t.raw("notes") as Note[];
+  // CMS display options (services_page_options, ADR-0013); defaults = the designed page.
+  const options = servicesPageOptions(await getMessages());
+  const surface = pageSurface(options);
 
   return (
-    <>
+    <div className={surface.className} style={surface.style}>
       <PageHeader eyebrow={t.raw("eyebrow")} intro={t.raw("intro")}>
         <RichText value={t.raw("titleLine1")} format="inline" />
         <br />
@@ -72,7 +76,7 @@ export default async function DienstenPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="section section--tight notes">
+      <section className="section section--tight notes page-card">
         <div className="container notes-grid">
           {notes.map((note) => (
             <div className="reveal" key={note.eyebrow}>
@@ -88,8 +92,8 @@ export default async function DienstenPage({ params }: Props) {
         </div>
       </section>
 
-      <BookingStrip titleKey="default" />
+      {options.show_booking_strip && <BookingStrip titleKey="default" />}
       <RevealObserver />
-    </>
+    </div>
   );
 }

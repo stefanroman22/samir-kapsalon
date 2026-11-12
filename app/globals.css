@@ -2129,3 +2129,89 @@ body::-webkit-scrollbar,
   .route-loading-spinner { animation: none; }
 }
 
+
+/* ============================================================
+   CMS DISPLAY OPTIONS (ADR-0013)
+   Set by pageSurface() in lib/page-options.ts as classes + CSS
+   variables on each page's `.page-surface` wrapper. No class =
+   the designed look.
+   ============================================================ */
+
+/* content_width: text containers only; the hero keeps the site container. */
+.page-width-narrow .container:not(.hero-content) { max-width: 1024px; }
+.page-width-wide .container:not(.hero-content) { max-width: 1600px; }
+.page-width-full .container:not(.hero-content) { max-width: none; }
+/* Narrow: the gallery header stacks its intro under the title, which needs the full column. */
+.page-width-narrow .page-header-row { grid-template-columns: 1fr; gap: 32px; }
+/* Wide / full: portraits and the map keep a sensible height (crop wider instead of growing taller). */
+:is(.page-width-wide, .page-width-full) :is(.team-portrait, .map-card--big) { max-height: 840px; }
+
+/* Home about band (about_image_position). Phones keep text-then-images. */
+@media (min-width: 1024px) {
+  .about-grid--images-left { grid-template-columns: 1.1fr 1fr; }
+  .about-grid--images-left .about-images { order: -1; }
+  .about-grid--no-images { grid-template-columns: 1fr; }
+}
+.about-grid--no-images .about-copy { max-width: 760px; }
+
+/* Contact hero (map_position). Phones keep details-then-map. */
+@media (min-width: 1024px) {
+  .contact-grid--map-left { grid-template-columns: 1.2fr 1fr; }
+  .contact-grid--map-left .contact-right { order: -1; }
+  .contact-grid--no-map { grid-template-columns: 1fr; }
+}
+.contact-grid--no-map .contact-left { max-width: 720px; }
+
+/* ---------- Client-chosen page colours ----------
+   Light theme only: the dark theme (.dark / [data-theme='dark']) keeps its own
+   palette. Text tokens follow the client colour (--page-ink etc., each >= 4.5:1). */
+.page-custom-bg:not(:is(.dark, [data-theme='dark']) *) {
+  background: var(--page-bg);
+  color: var(--page-ink);
+  --foreground: var(--page-ink);
+  --muted-foreground: var(--page-muted);
+  --border: var(--page-line);
+  --cms-rich-link: var(--page-accent);
+  --cms-rich-link-hover: var(--page-accent);
+  --cms-rich-marker: var(--page-accent);
+  --cms-rich-quote-border: var(--page-accent);
+  --cms-rich-rule: var(--page-line);
+}
+/* Light sections that paint the designed background take the page colour instead. */
+.page-custom-bg:not(:is(.dark, [data-theme='dark']) *) :is(.page-header, .contact-hero, .location-strip, .page-card) {
+  background: transparent;
+}
+/* card_background: the page's text band (`.page-card`). */
+.page-custom-card:not(:is(.dark, [data-theme='dark']) *) .page-card {
+  background: var(--page-card-bg);
+  color: var(--page-card-ink);
+  --foreground: var(--page-card-ink);
+  --muted-foreground: var(--page-card-muted);
+  --border: var(--page-card-line);
+  --page-accent: var(--page-card-accent);
+  --cms-rich-link: var(--page-card-accent);
+  --cms-rich-link-hover: var(--page-card-accent);
+  --cms-rich-marker: var(--page-card-accent);
+  --cms-rich-quote-border: var(--page-card-accent);
+  --cms-rich-rule: var(--page-card-line);
+}
+/* Accent-coloured text keeps the accent hue, darkened/lightened to stay readable. */
+:is(.page-custom-bg, .page-custom-card .page-card):not(:is(.dark, [data-theme='dark']) *) :is(.text-accent, .eyebrow--accent, .contact-act),
+:is(.page-custom-bg, .page-custom-card .page-card):not(:is(.dark, [data-theme='dark']) *) .hours tr.is-today td:first-child,
+:is(.page-custom-bg, .page-custom-card .page-card):not(:is(.dark, [data-theme='dark']) *) .hours--big tr.is-today td:last-child {
+  color: var(--page-accent);
+}
+/* The booking card keeps its designed light surface and ink (it has inner light cards and inputs). */
+.page-custom-bg:not(:is(.dark, [data-theme='dark']) *) .fr-shell:not(.fr-shell--done) {
+  --foreground: oklch(20% 0.015 60);
+  --muted-foreground: oklch(45% 0.012 60);
+  --border: oklch(86% 0.005 70);
+  color: var(--foreground);
+}
+/* A dark page colour: the transparent header over it switches to its solid (scrolled) look. */
+:root:not(.dark, [data-theme='dark']) body:not(.dark, [data-theme='dark']):has(.page-custom-ink) .site-header:not([data-overlay="true"]) {
+  background: oklch(96% 0.005 80 / 0.94);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom-color: var(--border);
+}

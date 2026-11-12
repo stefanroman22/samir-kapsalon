@@ -5,6 +5,7 @@ import { GalleryGrid } from "@/components/sections/GalleryGrid";
 import { RevealObserver } from "@/components/chrome/RevealObserver";
 import { resolveSite } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
+import { galleryPageOptions, pageSurface } from "@/lib/page-options";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -29,10 +30,14 @@ export default async function GalerijPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("galerij");
-  const { galleryImages } = resolveSite(await getMessages());
+  const messages = await getMessages();
+  const { galleryImages } = resolveSite(messages);
+  // CMS display options (gallery_page_options, ADR-0013); defaults = the designed page.
+  const options = galleryPageOptions(messages);
+  const surface = pageSurface(options);
 
   return (
-    <>
+    <div className={surface.className} style={surface.style}>
       <section className="page-header">
         <div className="container page-header-row">
           <div>
@@ -59,16 +64,18 @@ export default async function GalerijPage({ params }: Props) {
               alt: t("imageAlt"),
             }}
           />
-          <div className="gallery-caption mt-48 reveal">
-            <span className="rule" aria-hidden="true" />
-            <p className="t-14 text-muted" style={{ maxWidth: "56ch" }}>
-              <RichText value={t.raw("caption")} format="inline" />
-            </p>
-          </div>
+          {options.show_caption && (
+            <div className="gallery-caption mt-48 reveal">
+              <span className="rule" aria-hidden="true" />
+              <p className="t-14 text-muted" style={{ maxWidth: "56ch" }}>
+                <RichText value={t.raw("caption")} format="inline" />
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
       <RevealObserver />
-    </>
+    </div>
   );
 }

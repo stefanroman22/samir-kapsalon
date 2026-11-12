@@ -3,13 +3,16 @@ import { getTranslations, getMessages } from "next-intl/server";
 import { resolveSite, isSvgUrl } from "@/lib/cms-site";
 import { RichText } from "@/lib/cms-rich-text";
 
-export async function AboutStrip() {
+// `imagePosition` is the home_page_options `about_image_position`: right (designed) | left | hidden.
+export async function AboutStrip({ imagePosition = "right" }: { imagePosition?: string }) {
   const t = await getTranslations("about");
   const { aboutImages } = resolveSite(await getMessages());
+  const gridVariant =
+    imagePosition === "left" ? " about-grid--images-left" : imagePosition === "hidden" ? " about-grid--no-images" : "";
 
   return (
-    <section className="section about-strip">
-      <div className="container about-grid">
+    <section className="section about-strip page-card">
+      <div className={`container about-grid${gridVariant}`}>
         <div className="about-copy reveal">
           <span className="eyebrow"><RichText value={t.raw("eyebrow")} format="inline" /></span>
           <h2
@@ -37,28 +40,30 @@ export async function AboutStrip() {
           </div>
         </div>
 
-        <div className="about-images reveal">
-          <div className="editorial ratio-45" data-placeholder="true">
-            <Image
-              src={aboutImages[0]}
-              unoptimized={isSvgUrl(aboutImages[0])}
-              alt={t("img1Alt")}
-              fill
-              sizes="(max-width: 1024px) 60vw, 30vw"
-              style={{ objectFit: "cover" }}
-            />
+        {imagePosition !== "hidden" && (
+          <div className="about-images reveal">
+            <div className="editorial ratio-45" data-placeholder="true">
+              <Image
+                src={aboutImages[0]}
+                unoptimized={isSvgUrl(aboutImages[0])}
+                alt={t("img1Alt")}
+                fill
+                sizes="(max-width: 1024px) 60vw, 30vw"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+            <div className="editorial ratio-11 about-img-2" data-placeholder="true">
+              <Image
+                src={aboutImages[1]}
+                unoptimized={isSvgUrl(aboutImages[1])}
+                alt={t("img2Alt")}
+                fill
+                sizes="(max-width: 1024px) 30vw, 15vw"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
           </div>
-          <div className="editorial ratio-11 about-img-2" data-placeholder="true">
-            <Image
-              src={aboutImages[1]}
-              unoptimized={isSvgUrl(aboutImages[1])}
-              alt={t("img2Alt")}
-              fill
-              sizes="(max-width: 1024px) 30vw, 15vw"
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

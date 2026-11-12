@@ -83,6 +83,13 @@ function cmsToMessages(content: Json): Json {
   // Project theme (ADR-0011): raw value, validated by the kit's readTheme in resolveSite.
   const theme = content.general_theme;
   if (theme && typeof theme === "object") site.theme = theme;
+  // Display options (ADR-0013): raw `<page>_page_options` services, validated by the
+  // kit's readOptions in lib/page-options.ts.
+  const pageOptions: Json = {};
+  for (const [key, value] of Object.entries(content)) {
+    if (key.endsWith("_page_options") && value && typeof value === "object") pageOptions[key] = value;
+  }
+  if (Object.keys(pageOptions).length) site.pageOptions = pageOptions;
   const gallery = (key: string): string[] | null => {
     const arr = (content[key] as Json | undefined)?.items;
     return Array.isArray(arr) && arr.length ? (arr as string[]) : null;
